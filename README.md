@@ -23,4 +23,11 @@ cd api && sls credentials set -i AKIDxxxx -k xxxxxxxxxxxx
 make && sls deploy
 ```
 
+4. Access the API-gateway url in log, like:
+
+```
+path:   /service/v1/releases
+url:    https://xxxx-xxxx-xxxxxxxx.gz.apigw.tencentcs.com/release/service/v1/releases
+```
+
 Winlin 2021.06
