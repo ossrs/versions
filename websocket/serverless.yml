@@ -27,6 +27,9 @@ inputs:
   apigw:
     timeout: 300
     environment: release
+    serviceId: ${output:${stage}:${app}:wsgw-service.serviceId}
     protocols:
       - http
       - https
+
+# https://github.com/serverless-components/tencent-websocket/blob/master/docs/configure.md

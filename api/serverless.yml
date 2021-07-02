@@ -28,10 +28,13 @@ inputs:
   events:
     - apigw:
         parameters:
+          environment: release
+          serviceId: ${output:${stage}:${app}:apigw-service.serviceId}
           endpoints:
             - method: GET
               path: /service/v1/releases
-          environment: release
           protocols:
             - http
             - https
+
+# https://github.com/serverless-components/tencent-scf/blob/master/docs/configure.md
