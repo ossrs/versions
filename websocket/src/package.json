@@ -1,6 +1,0 @@
-{
-  "devDependencies": {
-    "mysql2": "^2.2.5",
-    "tencentcloud-serverless-nodejs": "^1.0.3"
-  }
-}
