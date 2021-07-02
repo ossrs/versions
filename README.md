@@ -14,7 +14,7 @@ npm install -g serverless
 2. Create a [user with AK](https://console.cloud.tencent.com/cam):
 
 ```bash
-cd api && sls credentials set -i AKIDxxxx -k xxxxxxxxxxxx
+( cd api && sls credentials set -i AKIDxxxx -k xxxxxxxxxxxx )
 ```
 
 3. Build and deploy serverless:
