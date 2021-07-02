@@ -22,9 +22,6 @@ inputs:
   environment:
     variables:
       REGION: ${env:REGION}
-      TDMQ_URL: ${env:TDMQ_URL}
-      TDMQ_TOKEN: ${env:TDMQ_TOKEN}
-      TDMQ_TOPIC: ${env:TDMQ_TOPIC}
   events:
     - apigw:
         parameters:
