@@ -1,0 +1,37 @@
+app: srs-version
+stage: dev
+
+component: scf
+name: api-service
+
+inputs:
+  name: ${name}-${stage}-${app}
+  region: ${env:REGION}
+  description: ${stage}, ${env:DESCRIPTION}
+  eip: false
+  enableRoleAuth: true
+  handler: main
+  memorySize: 128
+  namespace: default
+  publicAccess: true
+  runtime: Go1
+  timeout: 3
+  src: 
+    bucket: srs-version-scf
+    src: ./src
+  environment:
+    variables:
+      REGION: ${env:REGION}
+      TDMQ_URL: ${env:TDMQ_URL}
+      TDMQ_TOKEN: ${env:TDMQ_TOKEN}
+      TDMQ_TOPIC: ${env:TDMQ_TOPIC}
+  events:
+    - apigw:
+        parameters:
+          endpoints:
+            - method: GET
+              path: /service/v1/releases
+          environment: release
+          protocols:
+            - http
+            - https
