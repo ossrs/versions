@@ -25,6 +25,8 @@ REGION=ap-guangzhou
 ZONE2=ap-guangzhou-2
 ZONE4=ap-guangzhou-4
 DESCRIPTION=SRS查询可用的稳定版本
+
+MYSQL_DB=srs_version
 END
 ```
 

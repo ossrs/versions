@@ -2,12 +2,15 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/tencentyun/scf-go-lib/cloudfunction"
 	"github.com/tencentyun/scf-go-lib/events"
 )
@@ -74,6 +77,9 @@ func handler(ctx context.Context, e events.APIGatewayRequest) (*VersionResponse,
 	} else if strings.HasPrefix(version, "v4.") {
 		res.MatchDocker = stableDocker4
 		res.MatchVersion = stableVersion4
+	} else if strings.HasPrefix(version, "v5.") {
+		res.MatchDocker = stableDocker4
+		res.MatchVersion = stableVersion4
 	} else {
 		res.MatchDocker = stableDocker3
 		res.MatchVersion = stableVersion3
@@ -93,7 +99,118 @@ func handler(ctx context.Context, e events.APIGatewayRequest) (*VersionResponse,
 	q.Set("rip", headers.Get("X-Forwarded-For"))
 	fmt.Printf("SRS id=%v, version=%v, eip=%v, rip=%v, res=(%v), REGION=%v by %v\n", q.Get("id"), version, q.Get("eip"), q.Get("rip"), res, os.Getenv("REGION"), e)
 
+	if err := writeMySQL(q, res); err != nil {
+		return nil, err
+	}
+
 	return res, nil
+}
+
+var mysqlOnce sync.Once
+
+func writeMySQL(q url.Values, res *VersionResponse) error {
+	// Create db and tables if not exists.
+	var err error
+	mysqlOnce.Do(func() {
+		err = mysqlInit()
+	})
+	if err != nil {
+		return err
+	}
+
+	// Ignore if empty id.
+	if q.Get("id") == "" {
+		return nil
+	}
+
+	// Connect to MySQL DB.
+	db, err := sql.Open("mysql", mysqlURLWithDB())
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	// Get the id if not exists.
+	exists, err := db.Query("SELECT id from versions WHERE id=?", q.Get("id"))
+	if err != nil {
+		return err
+	}
+
+	// Create the SRS server information if not exists.
+	if !exists.Next() {
+		if _, err = db.Exec("INSERT INTO versions(id) VALUES(?)", q.Get("id")); err != nil {
+			return err
+		}
+	}
+
+	// Update the SRS server information.
+	if _, err = db.Exec(`
+		UPDATE 
+			versions 
+		SET 
+			id=?, version=?, ts=?, eip=?, rip=?, 
+			match_version=?, stable_version=? 
+		WHERE 
+			id=?
+		`,
+		q.Get("id"), q.Get("version"), q.Get("ts"), q.Get("eip"), q.Get("rip"),
+		res.MatchVersion, res.StableVersion,
+		q.Get("id"),
+	); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func mysqlInit() error {
+	db, err := sql.Open("mysql", mysqlURLNoDB())
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	if _, err = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %v", os.Getenv("MYSQL_DB"))); err != nil {
+		return err
+	}
+
+	if _, err = db.Exec(fmt.Sprintf("USE %v", os.Getenv("MYSQL_DB"))); err != nil {
+		return err
+	}
+
+	// @see https://blog.csdn.net/weter_drop/article/details/89924451
+	if _, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS versions (
+			id varchar(64) NOT NULL COMMENT "SRS server id",
+			version varchar(16) DEFAULT NULL COMMENT "SRS server current version",
+			match_version varchar(16) DEFAULT NULL COMMENT "SRS server matched version",
+			stable_version varchar(16) DEFAULT NULL COMMENT "SRS server stable version",
+			eip varchar(256) DEFAULT NULL COMMENT "SRS local eip(public ip), by SRS",
+			rip varchar(256) DEFAULT NULL COMMENT "SRS real eip(internet ip), by SCF",
+			ts varchar(32) DEFAULT NULL COMMENT "SRS server current timestamp",
+			create_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT "Create datetime",
+			update_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT "Last update datetime",
+			PRIMARY KEY (id)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8
+	`); err != nil {
+		return err
+	}
+
+	fmt.Printf("init db %v ok\n", mysqlURLWithDB())
+
+	return nil
+}
+
+func mysqlURLNoDB() string {
+	return fmt.Sprintf("root:%v@tcp(%v:%v)/",
+		os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_PORT"),
+	)
+}
+
+func mysqlURLWithDB() string {
+	return fmt.Sprintf("root:%v@tcp(%v:%v)/%v?charset=utf8",
+		os.Getenv("MYSQL_PASSWORD"), os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_PORT"), os.Getenv("MYSQL_DB"),
+	)
 }
 
 func main() {
