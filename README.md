@@ -17,13 +17,24 @@ npm install -g serverless
 ( cd api && sls credentials set -i AKIDxxxx -k xxxxxxxxxxxx )
 ```
 
-3. Build and deploy serverless:
+3. Setup the environments by `.env`:
+
+```bash
+cat << END > .env
+REGION=ap-guangzhou
+ZONE2=ap-guangzhou-2
+ZONE4=ap-guangzhou-4
+DESCRIPTION=SRS查询可用的稳定版本
+END
+```
+
+4. Build and deploy serverless:
 
 ```bash
 make && sls deploy
 ```
 
-4. Access the API-gateway url in log, like:
+5. Access the API-gateway url in log, like:
 
 ```
 path:   /service/v1/releases
