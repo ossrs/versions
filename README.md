@@ -30,6 +30,7 @@ MYSQL_DB=srs_version
 
 IM_SDKAPPID=xxxxxxxxx
 IM_SECRETKEY=xxxxxxxxxxxxxxx
+IM_ADMINISTRATOR=administrator
 END
 ```
 

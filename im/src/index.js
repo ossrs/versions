@@ -1,16 +1,18 @@
 'use strict';
 
 const im = require('./im.server')
+const TLSSigAPIv2 = require('tls-sig-api-v2')
+const sdk = im.create(process.env.IM_SDKAPPID, process.env.IM_SECRETKEY, process.env.IM_ADMINISTRATOR)
 
 exports.main_handler = async (event, context) => {
-    console.log("Hello World", event, context, process.env)
+    const q = event.queryString
+    console.log("Hello World", event, q)
 
     if (event.path === '/im-service/v1/login') {
-        const user = event.queryString.user
-        const {userSig} = await im.login(process.env.IM_SDKAPPID, user, process.env.IM_SECRETKEY)
         return {
-            user_id: user,
-            user_sig: userSig,
+            user_id: q.user,
+            user_sig: new TLSSigAPIv2.Api(parseInt(process.env.IM_SDKAPPID), process.env.IM_SECRETKEY).genSig(q.user, 1 * 24 * 3600),
+            res: await sdk.account_import(q.user, q.nickName, q.faceUrl),
         }
     }
 
