@@ -15,12 +15,12 @@ import (
 	"github.com/tencentyun/scf-go-lib/events"
 )
 
-const stableDocker2 = "v2.0-r9"
-const stableVersion2 = "2.0.273"
-const stableDocker3 = "v3.0-r6"
-const stableVersion3 = "3.0.163"
-const stableDocker4 = "v4.0.136"
-const stableVersion4 = "v4.0.136"
+const stableDocker2 = "v2.0-r10"
+const stableVersion2 = "2.0.274"
+const stableDocker3 = "v3.0-r7"
+const stableVersion3 = "3.0.164"
+const stableDocker4 = "v4.0.139"
+const stableVersion4 = "v4.0.139"
 
 const dockerImage = "ossrs/srs"
 const dockerMirror = "registry.cn-hangzhou.aliyuncs.com/ossrs/srs"

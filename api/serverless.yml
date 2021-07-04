@@ -35,7 +35,7 @@ inputs:
           environment: release
           serviceId: ${output:${stage}:${app}:apigw-service.serviceId}
           endpoints:
-            - method: GET
+            - method: ANY # GET POST PUT DELETE HEAD ANY
               path: /service/v1/releases
           protocols:
             - http

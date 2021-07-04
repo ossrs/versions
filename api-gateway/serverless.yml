@@ -14,9 +14,9 @@ inputs:
   endpoints:
     - path: /helloworld
       protocol: HTTP
-      method: GET
+      method: ANY # GET POST PUT DELETE HEAD ANY
       apiName: 'mock-api'
       serviceType: MOCK
-      serviceMockReturnMessage: 'Hello World!'
+      serviceMockReturnMessage: '{"code": 0, "data": {"module": "HTTP/HTTPS API Gateway", "path": "/service/v1/releases"}}'
 
 # https://github.com/serverless-components/tencent-apigateway/blob/master/docs/configure.md
