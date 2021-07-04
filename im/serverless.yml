@@ -26,6 +26,7 @@ inputs:
           endpoints:
             - method: ANY # GET POST PUT DELETE HEAD ANY
               path: /im-service/v1/
+              enableCORS: true
           protocols:
             - http
             - https
