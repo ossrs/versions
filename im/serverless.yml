@@ -1,0 +1,26 @@
+app: srs-version
+stage: dev
+
+component: scf
+name: im-service
+
+inputs:
+  region: ${env:REGION}
+  functionName: ${app}-${name}-${stage}
+  handler: index.main_handler
+  timeout: 30
+  runtime: Nodejs10.15
+  src: 
+    bucket: srs-version-scf
+    src: ./src
+  events:
+    - apigw:
+        parameters:
+          environment: release
+          serviceId: ${output:${stage}:${app}:apigw-service.serviceId}
+          endpoints:
+            - method: ANY # GET POST PUT DELETE HEAD ANY
+              path: /im-service/v1/releases
+          protocols:
+            - http
+            - https
