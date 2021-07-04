@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "async-redis": "^2.0.0",
+    "bluebird": "^3.7.2",
+    "mysql2": "^2.2.5",
+    "pg": "^8.6.0",
+    "redis": "^3.1.2",
+    "tencentcloud-serverless-nodejs": "^1.0.3",
+    "util": "^0.12.4"
+  }
+}

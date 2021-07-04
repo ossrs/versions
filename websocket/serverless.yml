@@ -1,0 +1,26 @@
+app: srs-version
+stage: dev
+
+component: websocket
+name: ws-service
+
+inputs:
+  region: ${env:REGION}
+  runtime: Nodejs10.15
+  src: 
+    bucket: srs-version-scf
+    src: ./src
+  faas:
+    role: SCF_QcsRole
+    name: ${name}-${stage}-${app}
+    timeout: 10
+    environment:
+      variables:
+        API_SERVICE: api-service-${stage}-${app}
+  apigw:
+    timeout: 300
+    environment: release
+    serviceId: ${output:${stage}:${app}:wsgw-service.serviceId}
+    protocols:
+      - http
+      - https

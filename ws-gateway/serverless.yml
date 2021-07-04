@@ -1,0 +1,22 @@
+app: srs-version
+stage: dev
+
+component: apigateway
+name: wsgw-service
+
+inputs:
+  region: ${env:REGION}
+  serviceName: wsgw_service
+  environment: release
+  protocols:
+    - http
+    - https
+  endpoints:
+    - path: /helloworld
+      protocol: HTTP
+      method: GET
+      apiName: 'mock-api'
+      serviceType: MOCK
+      serviceMockReturnMessage: 'Hello World!'
+
+# https://github.com/serverless-components/tencent-apigateway/blob/master/docs/configure.md
