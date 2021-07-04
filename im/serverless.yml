@@ -13,6 +13,10 @@ inputs:
   src: 
     bucket: srs-version-scf
     src: ./src
+  environment:
+    variables:
+      IM_SDKAPPID: ${env:IM_SDKAPPID}
+      IM_SECRETKEY: ${env:IM_SECRETKEY}
   events:
     - apigw:
         parameters:
@@ -20,7 +24,7 @@ inputs:
           serviceId: ${output:${stage}:${app}:apigw-service.serviceId}
           endpoints:
             - method: ANY # GET POST PUT DELETE HEAD ANY
-              path: /im-service/v1/releases
+              path: /im-service/v1/
           protocols:
             - http
             - https

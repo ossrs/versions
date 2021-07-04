@@ -27,8 +27,13 @@ ZONE4=ap-guangzhou-4
 DESCRIPTION=SRS查询可用的稳定版本
 
 MYSQL_DB=srs_version
+
+IM_SDKAPPID=xxxxxxxxx
+IM_SECRETKEY=xxxxxxxxxxxxxxx
 END
 ```
+
+> Note: Please set the right [IM_SDKAPPID and IM_SECRETKEY](https://console.cloud.tencent.com/im-detail).
 
 4. Build and deploy serverless:
 
