@@ -65,8 +65,9 @@ exports.main_handler = async (event, context) => {
   })
 
   // Modify the response body of api-service SCF.
-  let r1 = JSON.parse(r0.Result.RetMsg)
-  console.log(`SRS id=${q.id}, version=${version}, eip=${q.eip}, rip=${q.rip}, res=`, res, ', scf=', r1, ', by', event)
+  const r1 = r0.Result && r0.Result.RetMsg && JSON.parse(r0.Result.RetMsg)
+  res.db = (!r1 || r1.errorCode)? null : r1
+  console.log(`SRS id=${q.id}, version=${version}, eip=${q.eip}, rip=${q.rip}, res=`, res, ', scf=', r0, ', by', event)
 
   return res
 }

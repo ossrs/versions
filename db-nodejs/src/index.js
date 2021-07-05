@@ -9,6 +9,10 @@ exports.main_handler = async (event, context) => {
 
   // Create and update versions.
   if (event.path === '/db/v1/versions') {
+    if (!q.id || !q.version) {
+      throw new Error('no id or version')
+    }
+
     // Get the id if not exists.
     const [exits] = await db.query('SELECT id FROM versions WHERE id=? LIMIT 1', [String(q.id)])
 
@@ -34,7 +38,7 @@ exports.main_handler = async (event, context) => {
         String(q.id)
       ],
     )
-    return rows[0]
+    return {id:q.id, count:0}
   }
 
   return event
