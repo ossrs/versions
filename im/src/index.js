@@ -2,6 +2,7 @@
 
 const im = require('./im.server')
 const TLSSigAPIv2 = require('tls-sig-api-v2')
+const sha256 = require('js-sha256').sha256
 const SDKAppID = parseInt(process.env.IM_SDKAPPID)
 const sdk = im.create(SDKAppID, process.env.IM_SECRETKEY, process.env.IM_ADMINISTRATOR)
 
