@@ -62,6 +62,7 @@ exports.main_handler = async (event, context) => {
         res = event
     }
 
+    res.query = q
     console.log("Handle im", event.path, ", q=", q, ", res=", res, ", event=", event)
     return res
 };
