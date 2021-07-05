@@ -43,6 +43,10 @@ exports.main_handler = async (event, context) => {
         res = {
             im: await sdk.change_group_owner(q.id, q.user),
         }
+    } else if (event.path === '/im-service/v1/sendmsg') {
+        res = {
+            im: await sdk.sendmsg(q.from, 2, q.to, q.msg),
+        }
     } else {
         res = event
     }
