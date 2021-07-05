@@ -48,6 +48,11 @@ exports.main_handler = async (event, context) => {
         res = {
             im: await sdk.sendmsg(q.from, 2, q.to, body.msg),
         }
+    } else if (event.path === '/im-service/v1/send_group_msg') {
+        const body = JSON.parse(event.body)
+        res = {
+            im: await sdk.send_group_msg(q.from, q.to, body.msg),
+        }
     } else {
         res = event
     }

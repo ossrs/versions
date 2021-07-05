@@ -121,6 +121,20 @@ function create(SDKAppID, SECRETKEY, administrator) {
         }],
       })
     },
+    // 在群组中发送普通消息 @see https://cloud.tencent.com/document/product/269/1629
+    send_group_msg: async function(From_Account, GroupId, MsgContent) {
+      return apiRequest(generateUrl('v4/group_open_http_svc/send_group_msg'), {
+        From_Account: From_Account,
+        GroupId: GroupId,
+        MsgRandom: parseInt(Math.random() * 1000000),
+        MsgBody: [{
+          MsgType: 'TIMTextElem',
+          MsgContent: {
+            Text: MsgContent,
+          },
+        }],
+      })
+    },
     // Enums and Consts.
     TYPES: {
       // GroupType @see https://cloud.tencent.com/document/product/269/1502#GroupType
