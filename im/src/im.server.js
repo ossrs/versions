@@ -135,6 +135,14 @@ function create(SDKAppID, SECRETKEY, administrator) {
         }],
       })
     },
+    // 在群组中发送系统通知 @see https://cloud.tencent.com/document/product/269/1630
+    send_group_system_notification: async function(GroupId, ToMembers_Accounts, MsgContent) {
+      return apiRequest(generateUrl('v4/group_open_http_svc/send_group_system_notification'), {
+        GroupId: GroupId,
+        ToMembers_Account: ToMembers_Accounts,
+        Content: MsgContent,
+      })
+    },
     // Enums and Consts.
     TYPES: {
       // GroupType @see https://cloud.tencent.com/document/product/269/1502#GroupType

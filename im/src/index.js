@@ -53,6 +53,11 @@ exports.main_handler = async (event, context) => {
         res = {
             im: await sdk.send_group_msg(q.from, q.to, body.msg),
         }
+    } else if (event.path === '/im-service/v1/send_group_system_notification') {
+        const body = JSON.parse(event.body)
+        res = {
+            im: await sdk.send_group_msg(q.to, null, body.msg),
+        }
     } else {
         res = event
     }
