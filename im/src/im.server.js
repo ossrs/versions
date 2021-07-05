@@ -35,7 +35,7 @@ function create(SDKAppID, SECRETKEY, administrator) {
             body += chunk
           })
           res.on('end', () => {
-            resolve(body)
+            resolve(JSON.parse(body))
           })
         }
       )
@@ -59,13 +59,59 @@ function create(SDKAppID, SECRETKEY, administrator) {
   // Export SDK API.
   return {
     // 导入单个帐号 @see https://cloud.tencent.com/document/product/269/1608
-    account_import: async function(userId, nickName, faceUrl) {
+    account_import: async function(Identifier, Nick, FaceUrl) {
       return apiRequest(generateUrl('v4/im_open_login_svc/account_import'), {
-        "Identifier": userId,
-        "Nick": nickName,
-        "FaceUrl": faceUrl,
+        "Identifier": Identifier,
+        "Nick": Nick,
+        "FaceUrl": FaceUrl,
       })
-    }
+    },
+    // 创建群组 @see https://cloud.tencent.com/document/product/269/1615
+    create_group: async function(Owner_Account, Type, GroupId, Name) {
+      return apiRequest(generateUrl('v4/group_open_http_svc/create_group'), {
+        "Owner_Account": Owner_Account,
+        "Type": Type,
+        "GroupId": GroupId,
+        "Name": Name,
+      })
+    },
+    // 解散群组 @see https://cloud.tencent.com/document/product/269/1624
+    destroy_group: async function(GroupId) {
+      return apiRequest(generateUrl('v4/group_open_http_svc/destroy_group'), {
+        "GroupId": GroupId,
+      })
+    },
+    // 增加群成员 @see https://cloud.tencent.com/document/product/269/1621
+    add_group_member: async function(GroupId, Silence, Member_Accounts) {
+      return apiRequest(generateUrl('v4/group_open_http_svc/add_group_member'), {
+        "GroupId": GroupId,
+        "Silence": Silence,
+        "MemberList": Member_Accounts.map(function(x) { return {"Member_Account": x}; }),
+      })
+    },
+    // 删除群成员 @see https://cloud.tencent.com/document/product/269/1622
+    delete_group_member: async function(GroupId, Silence, MemberToDel_Accounts) {
+      return apiRequest(generateUrl('v4/group_open_http_svc/delete_group_member'), {
+        "GroupId": GroupId,
+        "Silence": Silence,
+        "MemberToDel_Account": MemberToDel_Accounts,
+      })
+    },
+    // 转让群主 @see https://cloud.tencent.com/document/product/269/1633
+    change_group_owner: async function(GroupId, NewOwner_Account) {
+      return apiRequest(generateUrl('v4/group_open_http_svc/change_group_owner'), {
+        "GroupId": GroupId,
+        "NewOwner_Account": NewOwner_Account,
+      })
+    },
+    // Enums and Consts.
+    TYPES: {
+      // GroupType @see https://cloud.tencent.com/document/product/269/1502#GroupType
+      GRP_WORK: 'Private',
+      GRP_PUBLIC: 'Public',
+      GRP_MEETING: 'ChatRoom',
+      GRP_AVCHATROOM: 'AVChatRoom',
+    },
   }
 }
 

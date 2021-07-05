@@ -34,7 +34,7 @@ IM_ADMINISTRATOR=administrator
 END
 ```
 
-> Note: Please set the right [IM_SDKAPPID and IM_SECRETKEY](https://console.cloud.tencent.com/im-detail).
+> Note: Please set the right [IM_SDKAPPID, IM_SECRETKEY and IM_ADMINISTRATOR](https://console.cloud.tencent.com/im-detail).
 
 4. Build and deploy serverless:
 
