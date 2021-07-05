@@ -1,9 +1,0 @@
-# github.com/go-sql-driver/mysql v1.6.0
-## explicit
-github.com/go-sql-driver/mysql
-# github.com/tencentyun/scf-go-lib v0.0.0-20200624065115-ba679e2ec9c9
-## explicit
-github.com/tencentyun/scf-go-lib/cloudfunction
-github.com/tencentyun/scf-go-lib/cloudfunction/messages
-github.com/tencentyun/scf-go-lib/events
-github.com/tencentyun/scf-go-lib/functioncontext

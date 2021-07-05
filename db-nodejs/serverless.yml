@@ -2,7 +2,7 @@ app: srs-version
 stage: dev
 
 component: scf
-name: api-service
+name: db-service
 
 inputs:
   name: ${name}-${stage}-${app}
@@ -10,31 +10,18 @@ inputs:
   handler: index.main_handler
   runtime: Nodejs10.15
   timeout: 30
-  role: SCF_QcsRole
   src: 
     bucket: srs-version-scf
     src: ./src
   environment:
     variables:
       REGION: ${env:REGION}
-      DB_SERVICE: db-service-${stage}-${app}
       MYSQL_DB: ${env:MYSQL_DB}
+      MYSQL_USER: ${env:MYSQL_USER}
       MYSQL_HOST: ${output:${stage}:${app}:mysql-service.connection.ip}
       MYSQL_PORT: ${output:${stage}:${app}:mysql-service.connection.port}
       MYSQL_PASSWORD: ${output:${stage}:${app}:mysql-service.adminPassword}
   vpcConfig:
     vpcId: ${output:${stage}:${app}:vpc4-service.vpcId}
     subnetId: ${output:${stage}:${app}:vpc4-service.subnetId}
-  events:
-    - apigw:
-        parameters:
-          environment: release
-          serviceId: ${output:${stage}:${app}:apigw-service.serviceId}
-          endpoints:
-            - method: ANY # GET POST PUT DELETE HEAD ANY
-              path: /service/v1/releases
-          protocols:
-            - http
-            - https
-
-# https://github.com/serverless-components/tencent-scf/blob/master/docs/configure.md
+  events: []

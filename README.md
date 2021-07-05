@@ -27,6 +27,7 @@ ZONE4=ap-guangzhou-4
 DESCRIPTION=SRS查询可用的稳定版本
 
 MYSQL_DB=srs_version
+MYSQL_USER=root
 
 IM_SDKAPPID=xxxxxxxxx
 IM_SECRETKEY=xxxxxxxxxxxxxxx

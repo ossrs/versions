@@ -5,8 +5,8 @@ component: scf
 name: im-service
 
 inputs:
+  name: ${name}-${stage}-${app}
   region: ${env:REGION}
-  functionName: ${app}-${name}-${stage}
   handler: index.main_handler
   timeout: 30
   runtime: Nodejs10.15
