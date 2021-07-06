@@ -23,6 +23,8 @@ inputs:
       MYSQL_PASSWORD: ${output:${stage}:${app}:mysql-service.adminPassword}
       SRS_ADMIN: ${env:SRS_ADMIN}
       SRS_PASSWORD: ${env:SRS_PASSWORD}
+      SRS_ADMIN1: ${env:SRS_ADMIN1}
+      SRS_PASSWORD1: ${env:SRS_PASSWORD1}
   vpcConfig:
     vpcId: ${output:${stage}:${app}:vpc4-service.vpcId}
     subnetId: ${output:${stage}:${app}:vpc4-service.subnetId}

@@ -35,6 +35,7 @@
             <input id="msg" value="Hello, world!">
             <input id="to" value="user1">
             <input id="group" type="checkbox"> Group
+            <input id="timestamp" type="checkbox"> Timestamp
             <button id="send">Send Message</button>
         </p>
     </div>
@@ -124,12 +125,12 @@
             $('#to').val($('#group').is(':checked')? 'MyMeeting' : 'user1');
         });
         $('#send').click(async () => {
+            const msg = ($('#timestamp').is(':checked')? new Date().getTime() + ': ' : '') +$('#msg').val();
             const res = await tim.sendMessage(tim.createTextMessage({
                 to: $('#to').val(),
                 conversationType: $('#group').is(':checked') ? TIM.TYPES.CONV_GROUP : TIM.TYPES.CONV_C2C,
                 payload: {
-                    // For text message.
-                    text: $('#msg').val(),
+                    text: msg,
                 },
             }));
             console.log('im', res); output(res);

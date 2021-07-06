@@ -31,10 +31,12 @@
             <input id="msg" value="Hello, world!">
             <input id="to" value="user1">
             <input id="group" type="checkbox"> Group
+            <input id="timestamp" type="checkbox"> Timestamp
             <button id="send">Send Message</button>
         </p>
     </div>
     <pre id="outputs"></pre>
+    <pre id="message"></pre>
 </div>
 <script src="js/jquery-1.10.2.min.js"></script>
 <script src="js/lib-generate-test-usersig.min.js"></script>
@@ -47,6 +49,9 @@
 
     function output(res) {
         $('#outputs').text(JSON.stringify(res, null, '  '));
+    }
+    function message(res) {
+        $('#message').text(JSON.stringify(res, null, '  '));
     }
 
     $(function () {
@@ -68,7 +73,7 @@
                 $('#rooms').show();
             });
             tim.on(TIM.EVENT.MESSAGE_RECEIVED, async (event) => {
-                console.log('received message', event); output(event);
+                console.log('received message', event); message(event);
             });
             await tim.login({userID: conf.userID, userSig: conf.userSig});
 
@@ -105,7 +110,8 @@
         });
         $('#send').click(async () => {
             const apiName = $('#group').is(':checked')? 'send_group_msg' : 'sendmsg';
-            const res = await $.post(service + apiName + '?from=' + $('#userId').val() + '&to=' + $('#to').val(), JSON.stringify({msg: $('#msg').val()})).promise();
+            const msg = ($('#timestamp').is(':checked')? new Date().getTime() + ': ' : '') +$('#msg').val();
+            const res = await $.post(service + apiName + '?from=' + $('#userId').val() + '&to=' + $('#to').val(), JSON.stringify({msg: msg})).promise();
             console.log('server sendmsg ok', res); output(res);
         });
     });
