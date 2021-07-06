@@ -3,7 +3,6 @@ const url = require('url')
 const http = require('http')
 const https = require('https')
 const TLSSigAPIv2 = require('tls-sig-api-v2')
-const { SDK, LogType }  = require('tencentcloud-serverless-nodejs')
 
 // The param SDKAppID is the sdkappid is of https://cloud.tencent.com/document/product/269/1519
 // The param administrator is the identifier of https://cloud.tencent.com/document/product/269/1519
