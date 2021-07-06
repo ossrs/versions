@@ -30,6 +30,7 @@ const initialize = async () => {
       CREATE TABLE IF NOT EXISTS versions (
         id varchar(64) NOT NULL COMMENT "SRS server id",
         version varchar(16) DEFAULT NULL COMMENT "SRS server current version",
+        role varchar(32) DEFAULT NULL COMMENT "This is who: srs(server), h5(page of ossrs.net)",
         match_version varchar(16) DEFAULT NULL COMMENT "SRS server matched version",
         stable_version varchar(16) DEFAULT NULL COMMENT "SRS server stable version",
         eip varchar(256) DEFAULT NULL COMMENT "SRS local eip(public ip), by SRS",

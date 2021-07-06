@@ -27,13 +27,13 @@ exports.main_handler = async (event, context) => {
       UPDATE 
         versions 
       SET 
-        version=?, ts=?, eip=?, rip=?, 
+        version=?, role=?, ts=?, eip=?, rip=?, 
         match_version=?, stable_version=? 
       WHERE 
         id=?
       `, 
       [
-        q.version, q.ts, q.eip, q.rip,
+        q.version, q.role, q.ts, q.eip, q.rip,
         res.match_version, res.stable_version,
         String(q.id)
       ],
