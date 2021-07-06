@@ -10,25 +10,27 @@ const tim = im.create(SDKAppID, process.env.IM_SECRETKEY, process.env.IM_ADMINIS
 exports.main_handler = async (event, context) => {
     const q = event.queryString
     if (event.path === '/im-service/v1/callback') {
-        const body = JSON.parse(event.body)
-        const res = {"ActionStatus": "OK", "ErrorCode": 0, "ErrorInfo": ""}
+        const body = event.body? JSON.parse(event.body) : {}
+        body.Info = body.Info || {}
 
-        console.log("Handle im", event.path, ", q=", q, ", body=", body, ", res=", res, ", event=", event)
+        // 状态变更回调，@see https://cloud.tencent.com/document/product/269/2570
+        if (body && body.CallbackCommand === 'State.StateChange') {
+            await new SDK().invoke({functionName: process.env.DB_SERVICE, logType: LogType.Tail, data: {
+                path: '/db/v1/logtrace', queryString: {level: 'trace', module: 'im', event: body.Info.Action, msg: `${body.Info.To_Account} ${body.Info.Action} for ${body.Info.Reason}, im-callback ${event.body}`},
+            }})
+        }
+
+        const res = {ActionStatus: 'OK', ErrorCode: 0, ErrorInfo: ''}
+        console.log(`Handle im ${event.path}, body=${event.body}, q=${JSON.stringify(q)}, res=${JSON.stringify(res)}`)
         return res
     }
 
     let res = null
     if (event.path === '/im-service/v1/login') {
         // Call the db-service SCF to verify admin user in MySQL.
-        const scf = new SDK()
-        const r0 = await scf.invoke({
-          functionName: process.env.DB_SERVICE, 
-          logType: LogType.Tail,
-          data: {
-            path: '/db/v1/admins',
-            queryString: {user: q.user, password: q.password},
-          }
-        })
+        const r0 = await new SDK().invoke({functionName: process.env.DB_SERVICE, logType: LogType.Tail, data: {
+            path: '/db/v1/admins', queryString: {user: q.user, password: q.password},
+        }})
       
         const r1 = r0.Result && r0.Result.RetMsg && JSON.parse(r0.Result.RetMsg)
         console.log('verify user ${q.user}, r1=', r1, ', r0=', r0)

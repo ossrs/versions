@@ -52,8 +52,24 @@ exports.main_handler = async (event, context) => {
       'SELECT count(1) AS nn FROM admins WHERE userName=? AND password=?',
       [q.user, q.password],
     )
+    const verify = rows[0] && rows[0].nn
 
-    return {user: q.user, verify: rows[0] && rows[0].nn}
+    // Write syslog.
+    await db.query(
+      'INSERT INTO logtrace(level, module, event, msg) VALUES(?, ?, ?, ?)',
+      ['trace', 'api', 'login', `${q.user} login, verify=${verify}, password=${q.password}`],
+    )
+
+    return {user: q.user, verify: verify}
+  }
+
+  // Write syslog.
+  if (event.path === '/db/v1/logtrace') {
+    await db.query(
+      'INSERT INTO logtrace(level, module, event, msg) VALUES(?, ?, ?, ?)',
+      [q.level, q.module, q.event, q.msg],
+    )
+    return null
   }
 
   return event

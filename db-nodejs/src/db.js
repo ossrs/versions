@@ -61,6 +61,20 @@ const initialize = async () => {
         String(process.env.SRS_ADMIN2), String(process.env.SRS_PASSWORD2),
       ]
     )
+
+    // Create syslog for login and logout.
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS logtrace (
+        id bigint NOT NULL AUTO_INCREMENT,
+        level varchar(16) DEFAULT NULL COMMENT "Log level: trace, warn, error",
+        module varchar(16) DEFAULT NULL COMMENT "Log module, defined by user",
+        event varchar(16) DEFAULT NULL COMMENT "Log event, defined by user",
+        msg varchar(1024) DEFAULT NULL COMMENT "Log description",
+        create_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT "Create datetime",
+        update_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT "Last update datetime",
+        PRIMARY KEY (id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8
+    `)
   } finally {
     conn.end()
   }
