@@ -19,9 +19,12 @@ const initialize = async () => {
 
   try {
     await conn.connect()
+
+    // Create DB.
     await conn.query("CREATE DATABASE IF NOT EXISTS " + process.env.MYSQL_DB)
     await conn.query("USE " + process.env.MYSQL_DB)
     
+    // Create versions table.
     // @see https://blog.csdn.net/weter_drop/article/details/89924451
     await conn.query(`
       CREATE TABLE IF NOT EXISTS versions (
@@ -37,22 +40,40 @@ const initialize = async () => {
         PRIMARY KEY (id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8
     `)
+
+    // Create admin table.
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS admins (
+        userName varchar(64) NOT NULL COMMENT "Admin user name",
+        password varchar(128) DEFAULT NULL COMMENT "Admin password",
+        create_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT "Create datetime",
+        update_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT "Last update datetime",
+        PRIMARY KEY (userName)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8
+    `)
+
+    await conn.query(
+      'INSERT IGNORE INTO admins(userName, password) VALUES(?, ?)', 
+      [String(process.env.SRS_ADMIN),String(process.env.SRS_PASSWORD)]
+    )
   } finally {
     conn.end()
   }
 }
 
 async function query(sql, values) {
+  await initialize()
+
   const conn = await mysql.createConnection({
       host : process.env.MYSQL_HOST,
       port : process.env.MYSQL_PORT,
       user : process.env.MYSQL_USER,
       password : process.env.MYSQL_PASSWORD,
+      database: process.env.MYSQL_DB,
   })
 
   try {
     await conn.connect()
-    await conn.query("USE " + process.env.MYSQL_DB)
     return await conn.query(sql, values)
   } finally {
     conn.end()

@@ -38,7 +38,22 @@ exports.main_handler = async (event, context) => {
         String(q.id)
       ],
     )
-    return {id:q.id, count:0}
+
+    return {id:q.id, count:rows.affectedRows}
+  }
+
+  // Admin user login.
+  if (event.path === '/db/v1/admins') {
+    if (!q.user || !q.password) {
+      throw new Error('no user or password')
+    }
+
+    const [rows] = await db.query(
+      'SELECT count(1) AS nn FROM admins WHERE userName=? AND password=?',
+      [q.user, q.password],
+    )
+
+    return {user: q.user, verify: rows[0] && rows[0].nn}
   }
 
   return event

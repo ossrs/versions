@@ -22,8 +22,8 @@ on('message', async (data, socket) => {
 
   // Call the api-service SCF.
   const { SDK, LogType }  = require('tencentcloud-serverless-nodejs')
-  const sdk = new SDK()
-  const res = await sdk.invoke({
+  const scf = new SDK()
+  const res = await scf.invoke({
     functionName: process.env.API_SERVICE, 
     logType: LogType.Tail,
     data: {queryString:data || {}} // For Go SCF

@@ -32,6 +32,9 @@ MYSQL_USER=root
 IM_SDKAPPID=xxxxxxxxx
 IM_SECRETKEY=xxxxxxxxxxxxxxx
 IM_ADMINISTRATOR=administrator
+
+SRS_ADMIN=winlin
+SRS_PASSWORD=ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f #sha256('12345678')
 END
 ```
 

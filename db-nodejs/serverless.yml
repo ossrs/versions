@@ -21,6 +21,8 @@ inputs:
       MYSQL_HOST: ${output:${stage}:${app}:mysql-service.connection.ip}
       MYSQL_PORT: ${output:${stage}:${app}:mysql-service.connection.port}
       MYSQL_PASSWORD: ${output:${stage}:${app}:mysql-service.adminPassword}
+      SRS_ADMIN: ${env:SRS_ADMIN}
+      SRS_PASSWORD: ${env:SRS_PASSWORD}
   vpcConfig:
     vpcId: ${output:${stage}:${app}:vpc4-service.vpcId}
     subnetId: ${output:${stage}:${app}:vpc4-service.subnetId}

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transport over IM</title>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit"/>
+    <meta name="force-rendering" content="webkit"/>
+</head>
+<body>
+<div>
+    <p id="logins">
+        <input id="userId" value="user0">
+        <input id="password" type="password" value="">
+        <button id="login">Login</button>
+        <button id="logout">Logout</button>
+        <button id="sha256">Sha256</button>
+    </p>
+    <div id="rooms">
+        <p>
+            <input id="roomID" value="MyMeeting">
+            <button id="enterRoom">Enter Room</button>
+            <button id="leaveRoom">Leave Room</button>
+            <button id="deleteRoom">Delete Room</button>
+        </p>
+        <p>
+            <input id="ownerID" value="user1">
+            <input id="roomID4Owner" value="MyMeeting">
+            <button id="changeOwner">Change Owner</button>
+        </p>
+        <p>
+            <input id="msg" value="Hello, world!">
+            <input id="to" value="user1">
+            <input id="group" type="checkbox"> Group
+            <button id="send">Send Message</button>
+        </p>
+    </div>
+    <pre id="outputs"></pre>
+</div>
+<script src="js/jquery-1.10.2.min.js"></script>
+<script src="js/lib-generate-test-usersig.min.js"></script>
+<script src="js/tim-js.js"></script>
+<script src="js/tim-upload-plugin.js"></script>
+<script src="js/sha256.min.js"></script>
+<script type="text/javascript">
+    let service = 'https://api.ossrs.net/im-service/v1/'; // The service prefix.
+    //let service = 'https://service-oa1p55d0-1303949587.gz.apigw.tencentcs.com/im-service/v1/';
+
+    function output(res) {
+        $('#outputs').text(JSON.stringify(res, null, '  '));
+    }
+
+    $(function () {
+        $('#rooms').hide();
+
+        $('#sha256').click(() => {
+            output({plaintext: $('#password').val(), cipher: sha256($('#password').val())});
+        });
+
+        // 登录，向IM注册用户
+        $('#login').click(async () => {
+            const conf = await $.post(service + 'login?user=' + $('#userId').val() + '&password=' + sha256($('#password').val())).promise();
+            console.log('server login ok', conf); output(conf);
+
+            const tim = TIM.create({SDKAppID: conf.SDKAppID});
+            tim.setLogLevel(1); // 0: Normal, 1: Release, 2: Warning, 3: Error, 4: Disabled.
+            tim.registerPlugin({'tim-upload-plugin': TIMUploadPlugin});
+            tim.on(TIM.EVENT.SDK_READY, async (event) => {
+                $('#rooms').show();
+            });
+            tim.on(TIM.EVENT.MESSAGE_RECEIVED, async (event) => {
+                console.log('received message', event); output(event);
+            });
+            await tim.login({userID: conf.userID, userSig: conf.userSig});
+
+            $('#logout').click(async () => {
+                await tim.logout();
+            });
+        });
+
+        // 进入房间，在IM加入群组，若不存在则创建群组
+        $('#enterRoom').click(async () => {
+            const res = await $.post(service + 'enter_room?user=' + $('#userId').val() + '&id=' + $('#roomID').val()).promise();
+            console.log('server enter room ok', res); output(res);
+        });
+
+        $('#deleteRoom').click(async () => {
+            const res = await $.post(service + 'delete_room?id=' + $('#roomID').val()).promise();
+            console.log('server delete room ok', res); output(res);
+        });
+
+        $('#leaveRoom').click(async () => {
+            const res = await $.post(service + 'leave_room?id=' + $('#roomID').val() + '&user=' + $('#userId').val()).promise();
+            console.log('server leave room ok', res); output(res);
+        });
+
+        // 离开房间转让权限，在IM转让群主身份
+        $('#changeOwner').click(async () => {
+            const res = await $.post(service + 'change_owner?id=' + $('#roomID4Owner').val() + '&user=' + $('#ownerID').val()).promise();
+            console.log('server leave room ok', res); output(res);
+        });
+
+        // 发送消息给个人或群组
+        $('#group').click(() => {
+            $('#to').val($('#group').is(':checked')? 'MyMeeting' : 'user1');
+        });
+        $('#send').click(async () => {
+            const apiName = $('#group').is(':checked')? 'send_group_msg' : 'sendmsg';
+            const res = await $.post(service + apiName + '?from=' + $('#userId').val() + '&to=' + $('#to').val(), JSON.stringify({msg: $('#msg').val()})).promise();
+            console.log('server sendmsg ok', res); output(res);
+        });
+    });
+</script>
+</body>
+</html>
