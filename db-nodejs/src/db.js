@@ -55,18 +55,11 @@ const initialize = async () => {
 
     // Create and update user.
     await conn.query(
-      'INSERT IGNORE INTO admins(userName, password) VALUES(?, ?),(?, ?)', [
+      'REPLACE INTO admins(userName, password) VALUES(?, ?),(?, ?),(?, ?)', [
         String(process.env.SRS_ADMIN), String(process.env.SRS_PASSWORD),
         String(process.env.SRS_ADMIN1), String(process.env.SRS_PASSWORD1),
+        String(process.env.SRS_ADMIN2), String(process.env.SRS_PASSWORD2),
       ]
-    )
-    await conn.query(
-      'UPDATE admins SET password=? WHERE userName=?',
-      [String(process.env.SRS_PASSWORD), String(process.env.SRS_ADMIN)]
-    )
-    await conn.query(
-      'UPDATE admins SET password=? WHERE userName=?',
-      [String(process.env.SRS_PASSWORD1), String(process.env.SRS_ADMIN1)]
     )
   } finally {
     conn.end()
