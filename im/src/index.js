@@ -1,11 +1,8 @@
 'use strict';
 
-const im = require('./im.server')
 const TLSSigAPIv2 = require('tls-sig-api-v2')
-const sha256 = require('js-sha256').sha256
 const { SDK, LogType }  = require('tencentcloud-serverless-nodejs')
 const SDKAppID = parseInt(process.env.IM_SDKAPPID)
-const tim = im.create(SDKAppID, process.env.IM_SECRETKEY, process.env.IM_ADMINISTRATOR)
 
 exports.main_handler = async (event, context) => {
     const q = event.queryString || {}
@@ -15,8 +12,8 @@ exports.main_handler = async (event, context) => {
 
         // 状态变更回调，@see https://cloud.tencent.com/document/product/269/2570
         if (body && body.CallbackCommand === 'State.StateChange') {
-            await new SDK().invoke({functionName: process.env.DB_SERVICE, logType: LogType.Tail, data: {
-                path: '/db/v1/logtrace', queryString: {level: 'trace', module: 'im', event: body.Info.Action, msg: `${body.Info.To_Account} ${body.Info.Action} for ${body.Info.Reason}, im-callback ${event.body}`},
+            await new SDK().invoke({functionName: process.env.DB_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+            path: '/db-internal/v1/logtrace', queryString: {level: 'trace', module: 'im', event: body.Info.Action, msg: `${body.Info.To_Account} ${body.Info.Action} for ${body.Info.Reason}, im-callback ${event.body}`},
             }})
         }
 
@@ -27,14 +24,12 @@ exports.main_handler = async (event, context) => {
 
     let res = null
     if (event.path === '/im-service/v1/login') {
-        // Call the db-service SCF to verify admin user in MySQL.
-        const r0 = await new SDK().invoke({functionName: process.env.DB_SERVICE, logType: LogType.Tail, data: {
-            path: '/db/v1/admins', queryString: {user: q.user, password: q.password},
-        }})
-      
-        const r1 = r0.Result && r0.Result.RetMsg && JSON.parse(r0.Result.RetMsg)
-        console.log('verify user ${q.user}, r1=', r1, ', r0=', r0)
-        if (!r1 || !r1.verify) {
+        // Call the db SCF to verify admin user in MySQL.
+        const r0 = parseSFCResult(await new SDK().invoke({functionName: process.env.DB_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+            path: '/db-internal/v1/admins', queryString: {user: q.user, password: q.password},
+        }}))
+        console.log('verify user ${q.user}, r0=', r0)
+        if (!r0 || !r0.verify) {
             throw new Error('verify user ' + q.user + ' failed')
         }
 
@@ -42,28 +37,41 @@ exports.main_handler = async (event, context) => {
             SDKAppID: SDKAppID,
             userID: q.user,
             userSig: new TLSSigAPIv2.Api(SDKAppID, process.env.IM_SECRETKEY).genSig(q.user, 1 * 24 * 3600),
-            im: await tim.account_import(q.user, q.nickName, q.faceUrl), 
         }
-    } else if (event.path === '/im-service/v1/account_import') {
-        res = {im: await tim.account_import(q.user, q.nickName, q.faceUrl)}
+        res.im = parseSFCResult(await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+            path: '/im-internal/v1/account_import', queryString: q,
+        }}))
     } else if (event.path === '/im-service/v1/enter_room') {
-        await tim.create_group(q.user, tim.TYPES.GRP_WORK, q.id, q.id),
-        res = {im: await tim.add_group_member(q.id, 1, [q.user])}
+        await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+            path: '/im-internal/v1/create_group', queryString: q,
+        }})
+        res.im = parseSFCResult(await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+            path: '/im-internal/v1/add_group_member', queryString: q,
+        }}))
     } else if (event.path === '/im-service/v1/delete_room') {
-        res = {im: await tim.destroy_group(q.id)}
+        res.im = parseSFCResult(await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+            path: '/im-internal/v1/destroy_group', queryString: q,
+        }}))
     } else if (event.path === '/im-service/v1/leave_room') {
-        res = {im: await tim.delete_group_member(q.id, 1, [q.user])}
+        res.im = parseSFCResult(await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+            path: '/im-internal/v1/delete_group_member', queryString: q,
+        }}))
     } else if (event.path === '/im-service/v1/change_owner') {
-        res = {im: await tim.change_group_owner(q.id, q.user)}
+        res.im = parseSFCResult(await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+            path: '/im-internal/v1/change_group_owner', queryString: q,
+        }}))
     } else if (event.path === '/im-service/v1/sendmsg') {
-        const body = JSON.parse(event.body)
-        res = {im: await tim.sendmsg(q.from, 2, q.to, body.msg)}
+        res.im = parseSFCResult(await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+            path: '/im-internal/v1/sendmsg', queryString: q, body: event.body,
+        }}))
     } else if (event.path === '/im-service/v1/send_group_msg') {
-        const body = JSON.parse(event.body)
-        res = {im: await tim.send_group_msg(q.from, q.to, body.msg)}
+        res.im = parseSFCResult(await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+            path: '/im-internal/v1/send_group_msg', queryString: q, body: event.body,
+        }}))
     } else if (event.path === '/im-service/v1/send_group_system_notification') {
-        const body = JSON.parse(event.body)
-        res = {im: await tim.send_group_system_notification(q.to, null, body.msg)}
+        res.im = parseSFCResult(await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+            path: '/im-internal/v1/send_group_system_notification', queryString: q, body: event.body,
+        }}))
     } else {
         res = event
     }
@@ -71,3 +79,7 @@ exports.main_handler = async (event, context) => {
     console.log("Handle im", event.path, ", q=", q, ", res=", res, ", event=", event)
     return res
 };
+
+function parseSFCResult(res) {
+    return (!res || !res.Result || !res.Result.RetMsg)? null : JSON.parse(res.Result.RetMsg)
+}

@@ -17,8 +17,8 @@ inputs:
   environment:
     variables:
       REGION: ${env:REGION}
-      DB_SERVICE: db-service-${stage}-${app}
-      IM_SERVICE: im-internal-service-${stage}-${app}
+      DB_INTERNAL_SERVICE: db-internal-service-${stage}-${app}
+      IM_INTERNAL_SERVICE: im-internal-service-${stage}-${app}
       MYSQL_DB: ${env:MYSQL_DB}
       MYSQL_HOST: ${output:${stage}:${app}:mysql-service.connection.ip}
       MYSQL_PORT: ${output:${stage}:${app}:mysql-service.connection.port}

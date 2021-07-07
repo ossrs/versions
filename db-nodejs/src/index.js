@@ -8,7 +8,7 @@ exports.main_handler = async (event, context) => {
   console.log(`db query ${event.path}, q=`, q, `, body=`, body)
 
   // Create and update versions.
-  if (event.path === '/db/v1/versions') {
+  if (event.path === '/db-internal/v1/versions') {
     if (!q.id || !q.version) {
       throw new Error('no id or version')
     }
@@ -43,7 +43,7 @@ exports.main_handler = async (event, context) => {
   }
 
   // Admin user login.
-  if (event.path === '/db/v1/admins') {
+  if (event.path === '/db-internal/v1/admins') {
     if (!q.user || !q.password) {
       throw new Error('no user or password')
     }
@@ -64,7 +64,7 @@ exports.main_handler = async (event, context) => {
   }
 
   // Write syslog.
-  if (event.path === '/db/v1/logtrace') {
+  if (event.path === '/db-internal/v1/logtrace') {
     await db.query(
       'INSERT INTO logtrace(level, module, event, msg) VALUES(?, ?, ?, ?)',
       [q.level, q.module, q.event, q.msg],
@@ -73,7 +73,7 @@ exports.main_handler = async (event, context) => {
   }
 
   // Query admin user lists.
-  if (event.path === '/db/v1/users') {
+  if (event.path === '/db-internal/v1/users') {
     const [rows] = await db.query('SELECT userName FROM admins')
     return {users: rows.map(function(e) { return e.userName; })}
   }

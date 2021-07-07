@@ -56,11 +56,11 @@ exports.main_handler = async (event, context) => {
 
   q.rip = event.headers && event.headers['X-Forwarded-For']
 
-  // Call the db-service SCF to write to MySQL.
+  // Call the db SCF to write to MySQL.
   let r0 = null
   if (q.id && q.version) {
-    let r = r0 = await new SDK().invoke({functionName: process.env.DB_SERVICE, logType: LogType.Tail, data: {
-      path: '/db/v1/versions', queryString: q, res: res,
+    let r = r0 = await new SDK().invoke({functionName: process.env.DB_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+      path: '/db-internal/v1/versions', queryString: q, res: res,
     }})
 
     // Modify the response body of api-service SCF.
@@ -71,14 +71,14 @@ exports.main_handler = async (event, context) => {
   // Call the im-service SCF to notify all users.
   let r1 = null
   if (q.id && q.version) {
-    let r = r1 = await new SDK().invoke({functionName: process.env.IM_SERVICE, logType: LogType.Tail, data: {
-      path: '/im-service/v1/send_group_msg', queryString: {to:process.env.IM_GROUP_SYSLOG}, 
-      body: JSON.stringify({msg: JSON.stringify({ts: new Date().getTime(), q: q, res: res})}),
+    let r = r1 = await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+      path: '/im-internal/v1/send_group_msg', queryString: {to:process.env.IM_GROUP_SYSLOG}, 
+      body: JSON.stringify({msg: JSON.stringify({api: new Date().getTime(), q: q, res: res})}),
     }})
 
     // Modify the response body of api-service SCF.
     let rr = r.Result && r.Result.RetMsg && JSON.parse(r.Result.RetMsg)
-    res.im = (!rr || rr.errorCode)? null : rr.im
+    res.im = (!rr || rr.errorCode)? null : rr
   }
 
   console.log(`SRS id=${q.id}, version=${version}, eip=${q.eip}, rip=${q.rip}, res=`, res, ', scf=', r0, r1, ', by', event)
@@ -93,20 +93,20 @@ async function initialize() {
   }
   global.initialized = true
 
-  // Call the db-service SCF to get system users.
-  let r0 = await new SDK().invoke({functionName: process.env.DB_SERVICE, logType: LogType.Tail, data: {
-    path: '/db/v1/users',
+  // Call the db SCF to get system users.
+  let r0 = await new SDK().invoke({functionName: process.env.DB_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+    path: '/db-internal/v1/users',
   }})
   let r1 = r0.Result && r0.Result.RetMsg && JSON.parse(r0.Result.RetMsg)
   console.log('users', r1.users)
 
-  // Call the im-service SCF to register users to IM, then create group and join.
+  // Call the im SCF to register users to IM, then create group and join.
   r1.users.map(async function(user) {
-    await new SDK().invoke({functionName: process.env.IM_SERVICE, logType: LogType.Tail, data: {
-      path: '/im-service/v1/account_import', queryString: {user: user}
+    await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+      path: '/im-internal/v1/account_import', queryString: {user: user}
     }})
-    await new SDK().invoke({functionName: process.env.IM_SERVICE, logType: LogType.Tail, data: {
-      path: '/im-service/v1/enter_room', queryString: {user: user, id: process.env.IM_GROUP_SYSLOG}
+    await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+      path: '/im-internal/v1/enter_room', queryString: {user: user, id: process.env.IM_GROUP_SYSLOG}
     }})
   })
 }

@@ -17,7 +17,6 @@ inputs:
   environment:
     variables:
       REGION: ${env:REGION}
-      DB_SERVICE: db-service-${stage}-${app}
       IM_SDKAPPID: ${env:IM_SDKAPPID}
       IM_SECRETKEY: ${env:IM_SECRETKEY}
       IM_ADMINISTRATOR: ${env:IM_ADMINISTRATOR}
