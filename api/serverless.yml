@@ -18,10 +18,12 @@ inputs:
     variables:
       REGION: ${env:REGION}
       DB_SERVICE: db-service-${stage}-${app}
+      IM_SERVICE: im-service-${stage}-${app}
       MYSQL_DB: ${env:MYSQL_DB}
       MYSQL_HOST: ${output:${stage}:${app}:mysql-service.connection.ip}
       MYSQL_PORT: ${output:${stage}:${app}:mysql-service.connection.port}
       MYSQL_PASSWORD: ${output:${stage}:${app}:mysql-service.adminPassword}
+      IM_GROUP_SYSLOG: ${env:IM_GROUP_SYSLOG}
   vpcConfig:
     vpcId: ${output:${stage}:${app}:vpc4-service.vpcId}
     subnetId: ${output:${stage}:${app}:vpc4-service.subnetId}

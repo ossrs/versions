@@ -72,5 +72,11 @@ exports.main_handler = async (event, context) => {
     return null
   }
 
+  // Query admin user lists.
+  if (event.path === '/db/v1/users') {
+    const [rows] = await db.query('SELECT userName FROM admins')
+    return {users: rows.map(function(e) { return e.userName; })}
+  }
+
   return event
 }
