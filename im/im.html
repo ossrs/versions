@@ -48,8 +48,8 @@
 <script src="js/tim-upload-plugin.js"></script>
 <script src="js/sha256.min.js"></script>
 <script type="text/javascript">
-    let service = 'https://api.ossrs.net/im-service/v1/'; // The service prefix.
-    //let service = 'https://service-oa1p55d0-1303949587.gz.apigw.tencentcs.com/im-service/v1/';
+    let service = 'https://api.ossrs.net'; // The service prefix.
+    //let service = 'https://service-oa1p55d0-1303949587.gz.apigw.tencentcs.com';
 
     function output(res) {
         $('#outputs').text(JSON.stringify(res, null, '  '));
@@ -69,7 +69,7 @@
 
         // 登录，向IM注册用户
         $('#login').click(async () => {
-            const conf = await $.post(service + 'login?user=' + $('#userId').val() + '&password=' + sha256($('#password').val())).promise();
+            const conf = await $.post(service + '/im-service/v1/login?user=' + $('#userId').val() + '&password=' + sha256($('#password').val())).promise();
             console.log('server login ok', conf); output(conf);
 
             tim = TIM.create({SDKAppID: conf.SDKAppID});

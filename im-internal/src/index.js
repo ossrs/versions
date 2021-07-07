@@ -32,12 +32,7 @@ exports.main_handler = async (event, context) => {
     } else if (event.path === '/im-internal/v1/enter_room') {
         await tim.create_group(q.user, tim.TYPES.GRP_WORK, q.id, q.id)
         res = await tim.add_group_member(q.id, 1, [q.user])
-    } else if (event.path === '/im-internal/v1/delete_room') {
-        res = await tim.destroy_group(q.id)
-    } else if (event.path === '/im-internal/v1/leave_room') {
-        res = await tim.delete_group_member(q.id, 1, [q.user])
-    } else if (event.path === '/im-internal/v1/change_owner') {
-        res = await tim.change_group_owner(q.id, q.user)
+    // Unknown API.
     } else {
         res = event
     }

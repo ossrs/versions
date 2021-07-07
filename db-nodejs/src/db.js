@@ -47,6 +47,7 @@ const initialize = async () => {
       CREATE TABLE IF NOT EXISTS admins (
         userName varchar(64) NOT NULL COMMENT "Admin user name",
         password varchar(128) DEFAULT NULL COMMENT "Admin password",
+        token varchar(128) DEFAULT NULL COMMENT "User temporary login token",
         create_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT "Create datetime",
         update_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT "Last update datetime",
         PRIMARY KEY (userName)

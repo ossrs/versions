@@ -44,8 +44,13 @@
 <script src="js/tim-upload-plugin.js"></script>
 <script src="js/sha256.min.js"></script>
 <script type="text/javascript">
-    let service = 'https://api.ossrs.net/im-service/v1/'; // The service prefix.
-    //let service = 'https://service-oa1p55d0-1303949587.gz.apigw.tencentcs.com/im-service/v1/';
+    let service = 'https://api.ossrs.net'; // The service prefix.
+    //let service = 'https://service-oa1p55d0-1303949587.gz.apigw.tencentcs.com';
+
+    let token = null; // The token to identify user, return by login.
+    function wrap(r) {
+        return token? (r + '&user=' + token.user + '&token' + token.token) : r;
+    }
 
     function output(res) {
         $('#outputs').text(JSON.stringify(res, null, '  '));
@@ -63,8 +68,9 @@
 
         // 登录，向IM注册用户
         $('#login').click(async () => {
-            const conf = await $.post(service + 'login?user=' + $('#userId').val() + '&password=' + sha256($('#password').val())).promise();
+            const conf = await $.post(service + '/im-service/v1/login?user=' + $('#userId').val() + '&password=' + sha256($('#password').val())).promise();
             console.log('server login ok', conf); output(conf);
+            token = {user: conf.userID, token: conf.token};
 
             const tim = TIM.create({SDKAppID: conf.SDKAppID});
             tim.setLogLevel(1); // 0: Normal, 1: Release, 2: Warning, 3: Error, 4: Disabled.
@@ -84,35 +90,40 @@
 
         // 进入房间，在IM加入群组，若不存在则创建群组
         $('#enterRoom').click(async () => {
-            const res = await $.post(service + 'enter_room?user=' + $('#userId').val() + '&id=' + $('#roomID').val()).promise();
+            const r = wrap(service + '/im-service/v1/enter_room?user=' + $('#userId').val() + '&id=' + $('#roomID').val());
+            const res = await $.post(r).promise();
             console.log('server enter room ok', res); output(res);
         });
 
         $('#deleteRoom').click(async () => {
-            const res = await $.post(service + 'delete_room?id=' + $('#roomID').val()).promise();
+            const r = wrap(service + '/im-service/v1/delete_room?id=' + $('#roomID').val());
+            const res = await $.post(r).promise();
             console.log('server delete room ok', res); output(res);
         });
 
         $('#leaveRoom').click(async () => {
-            const res = await $.post(service + 'leave_room?id=' + $('#roomID').val() + '&user=' + $('#userId').val()).promise();
+            const r = wrap(service + '/im-service/v1/leave_room?id=' + $('#roomID').val() + '&user=' + $('#userId').val());
+            const res = await $.post(r).promise();
             console.log('server leave room ok', res); output(res);
         });
 
         // 离开房间转让权限，在IM转让群主身份
         $('#changeOwner').click(async () => {
-            const res = await $.post(service + 'change_owner?id=' + $('#roomID4Owner').val() + '&user=' + $('#ownerID').val()).promise();
+            const r = wrap(service + '/im-service/v1/change_owner?id=' + $('#roomID4Owner').val() + '&user=' + $('#ownerID').val());
+            const res = await $.post(r).promise();
             console.log('server leave room ok', res); output(res);
         });
 
         // 发送消息给个人或群组
+        $('#send').click(async () => {
+            const apiName = $('#group').is(':checked')? '/im-service/v1/send_group_msg' : '/im-service/v1/sendmsg';
+            const msg = ($('#timestamp').is(':checked')? new Date().getTime() + ': ' : '') +$('#msg').val();
+            const r = wrap(service + apiName + '?from=' + $('#userId').val() + '&to=' + $('#to').val());
+            const res = await $.post(r, JSON.stringify({msg: msg})).promise();
+            console.log('server sendmsg ok', res); output(res);
+        });
         $('#group').click(() => {
             $('#to').val($('#group').is(':checked')? 'MyMeeting' : 'user1');
-        });
-        $('#send').click(async () => {
-            const apiName = $('#group').is(':checked')? 'send_group_msg' : 'sendmsg';
-            const msg = ($('#timestamp').is(':checked')? new Date().getTime() + ': ' : '') +$('#msg').val();
-            const res = await $.post(service + apiName + '?from=' + $('#userId').val() + '&to=' + $('#to').val(), JSON.stringify({msg: msg})).promise();
-            console.log('server sendmsg ok', res); output(res);
         });
     });
 </script>
