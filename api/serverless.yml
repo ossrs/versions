@@ -35,6 +35,7 @@ inputs:
           endpoints:
             - method: ANY # GET POST PUT DELETE HEAD ANY
               path: /service/v1/releases
+              enableCORS: true
           protocols:
             - http
             - https

@@ -1,0 +1,34 @@
+app: srs-version
+stage: dev
+
+component: scf
+name: code-service
+
+inputs:
+  name: ${name}-${stage}-${app}
+  region: ${env:REGION}
+  handler: index.main_handler
+  runtime: Nodejs10.15
+  timeout: 30
+  src:
+    bucket: srs-version-scf
+    src: ./src
+  environment:
+    variables:
+      REGION: ${env:REGION}
+      TENCENT_SECRET_ID: ${env:TENCENT_SECRET_ID}
+      TENCENT_SECRET_KEY: ${env:TENCENT_SECRET_KEY}
+      CAPTCHA_APP_ID: ${env:CAPTCHA_APP_ID}
+      CAPTCHA_APP_SECRET_KEY: ${env:CAPTCHA_APP_SECRET_KEY}
+  events:
+    - apigw:
+        parameters:
+          environment: release
+          serviceId: ${output:${stage}:${app}:apigw-service.serviceId}
+          endpoints:
+            - method: ANY # GET POST PUT DELETE HEAD ANY
+              path: /code-service/v1/
+              enableCORS: true
+          protocols:
+            - http
+            - https

@@ -6,6 +6,7 @@ all:
 	cd im && $(MAKE)
 	cd db-nodejs && $(MAKE)
 	cd im-internal && $(MAKE)
+	cd code && $(MAKE)
 
 clean:
 	cd api && $(MAKE) clean
@@ -13,3 +14,4 @@ clean:
 	cd im && $(MAKE) clean
 	cd db-nodejs && $(MAKE) clean
 	cd im-internal && $(MAKE) clean
+	cd code && $(MAKE) clean
