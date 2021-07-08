@@ -1,25 +1,9 @@
 'use strict';
 
-const tencentcloud = require("tencentcloud-sdk-nodejs")
+const CaptchaClient = require("tencentcloud-sdk-nodejs").captcha.v20190722.Client
 
 exports.main_handler = async (event, context) => {
     console.log('code verify', event)
-
-    const clientConfig = {
-        credential: {
-            secretId: process.env.TENCENT_SECRET_ID,
-            secretKey: process.env.TENCENT_SECRET_KEY,
-        },
-        region: process.env.REGION,
-        profile: {
-            httpProfile: {
-                // @see https://cloud.tencent.com/document/product/1110/36926
-                endpoint: "captcha.tencentcloudapi.com",
-            },
-        },
-    }
-    const CaptchaClient = tencentcloud.captcha.v20190722.Client
-    const client = new CaptchaClient(clientConfig)
 
     const r = (event && event.body)? JSON.parse(event.body) : {}
     const clientIp = (event && event.requestContext) ? event.requestContext.sourceIp : "127.0.0.1";
@@ -34,7 +18,20 @@ exports.main_handler = async (event, context) => {
         AppSecretKey: process.env.CAPTCHA_APP_SECRET_KEY,
     }
     const res = await new Promise((resolve, reject) => {
-        client.DescribeCaptchaResult(params).then(
+        const sdk = new CaptchaClient({
+            credential: {
+                secretId: process.env.TENCENT_SECRET_ID,
+                secretKey: process.env.TENCENT_SECRET_KEY,
+            },
+            profile: {
+                httpProfile: {
+                    // @see https://cloud.tencent.com/document/product/1110/36926
+                    endpoint: "captcha.tencentcloudapi.com",
+                },
+            },
+        })
+
+        sdk.DescribeCaptchaResult(params).then(
             (data) => {
                 resolve(data)
             },
