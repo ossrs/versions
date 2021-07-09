@@ -49,6 +49,11 @@ IM_GROUP_SYSLOG=SrsSystemLogs
 
 CAPTCHA_APP_ID=xxxxxxxxx
 CAPTCHA_APP_SECRET_KEY=xxxxxxxxxxxxxxx
+
+EMAIL_USER=xxx@xxx.com
+EMAIL_PASSWORD=xxxxxxxxx
+EMAIL_SERVICE=smtp.xxx.com
+EMAIL_PORT=xxx
 END
 ```
 
