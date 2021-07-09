@@ -8,6 +8,7 @@ all:
 	cd im-internal && $(MAKE)
 	cd code && $(MAKE)
 	cd email && $(MAKE)
+	cd sms && $(MAKE)
 
 clean:
 	cd api && $(MAKE) clean
@@ -17,3 +18,4 @@ clean:
 	cd im-internal && $(MAKE) clean
 	cd code && $(MAKE) clean
 	cd email && $(MAKE) clean
+	cd sms && $(MAKE) clean

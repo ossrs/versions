@@ -1,0 +1,25 @@
+app: srs-version
+stage: dev
+
+component: scf
+name: sms-service
+
+inputs:
+  name: ${name}-${stage}-${app}
+  region: ${env:REGION}
+  handler: index.main_handler
+  runtime: Nodejs10.15
+  timeout: 30
+  src:
+    bucket: srs-version-scf
+    src: ./src
+  environment:
+    variables:
+      REGION: ${env:REGION}
+      TENCENT_SECRET_ID: ${env:TENCENT_SECRET_ID}
+      TENCENT_SECRET_KEY: ${env:TENCENT_SECRET_KEY}
+      SMS_SDKAPPID: ${env:SMS_SDKAPPID}
+      SMS_SIGN_NAME: ${env:SMS_SIGN_NAME}
+      SMS_TEMPLATE_ID: ${env:SMS_TEMPLATE_ID}
+      SMS_PHONE_NUMBER: ${env:SMS_PHONE_NUMBER}
+  events: []
