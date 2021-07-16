@@ -106,8 +106,7 @@ function create(SDKAppID, SECRETKEY, administrator) {
     },
     // 单发单聊消息 @see https://cloud.tencent.com/document/product/269/2282
     sendmsg: async function(From_Account, SyncOtherMachine, To_Account, MsgContent) {
-      return apiRequest(generateUrl('v4/openim/sendmsg'), {
-        From_Account: From_Account,
+      const data = {
         SyncOtherMachine: SyncOtherMachine,
         To_Account: To_Account,
         MsgLifeTime: 1 * 3600, // in seconds
@@ -119,12 +118,13 @@ function create(SDKAppID, SECRETKEY, administrator) {
             Text: MsgContent,
           },
         }],
-      })
+      };
+      if (From_Account) data.From_Account = From_Account;
+      return apiRequest(generateUrl('v4/openim/sendmsg'), data);
     },
     // 在群组中发送普通消息 @see https://cloud.tencent.com/document/product/269/1629
     send_group_msg: async function(From_Account, GroupId, MsgContent) {
-      return apiRequest(generateUrl('v4/group_open_http_svc/send_group_msg'), {
-        From_Account: From_Account,
+      const data = {
         GroupId: GroupId,
         MsgRandom: parseInt(Math.random() * 1000000),
         MsgBody: [{
@@ -133,7 +133,9 @@ function create(SDKAppID, SECRETKEY, administrator) {
             Text: MsgContent,
           },
         }],
-      })
+      };
+      if (From_Account) data.From_Account = From_Account;
+      return apiRequest(generateUrl('v4/group_open_http_svc/send_group_msg'), data);
     },
     // 在群组中发送系统通知 @see https://cloud.tencent.com/document/product/269/1630
     send_group_system_notification: async function(GroupId, ToMembers_Accounts, MsgContent) {

@@ -106,7 +106,7 @@ async function initialize() {
       path: '/im-internal/v1/account_import', queryString: {user: user}
     }})
     await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
-      path: '/im-internal/v1/enter_room', queryString: {user: user, id: process.env.IM_GROUP_SYSLOG}
+      path: '/im-internal/v1/enter_room', queryString: {user: user, id: process.env.IM_GROUP_SYSLOG, type: process.env.IM_GROUP_TYPE}
     }})
   })
 }

@@ -17,14 +17,20 @@
     </p>
     <div id="rooms">
         <p>
-            <input id="roomID" value="MyMeeting">
+            <input id="roomID" value="SrsSystemLogs">
+            <select id="roomType">
+                <option value="Private">Private, 好友工作群（Work）</option>
+                <option value="Public">Public, 陌生人社交群（Public）</option>
+                <option value="ChatRoom">ChatRoom, 临时会议群（Meeting）</option>
+                <option value="AVChatRoom" selected>AVChatRoom, 直播群（AVChatRoom）</option>
+            </select>
             <button id="enterRoom">Enter Room</button>
             <button id="leaveRoom">Leave Room</button>
             <button id="deleteRoom">Delete Room</button>
         </p>
         <p>
             <input id="ownerID" value="user1">
-            <input id="roomID4Owner" value="MyMeeting">
+            <input id="roomID4Owner" value="SrsSystemLogs">
             <button id="changeOwner">Change Owner</button>
         </p>
         <p>
@@ -49,7 +55,7 @@
 
     let token = null; // The token to identify user, return by login.
     function wrap(r) {
-        return token? (r + '&user=' + token.user + '&token' + token.token) : r;
+        return token? (r + '&user=' + token.user + '&token=' + token.token) : r;
     }
 
     function output(res) {
@@ -90,7 +96,7 @@
 
         // 进入房间，在IM加入群组，若不存在则创建群组
         $('#enterRoom').click(async () => {
-            const r = wrap(service + '/im-service/v1/enter_room?user=' + $('#userId').val() + '&id=' + $('#roomID').val());
+            const r = wrap(service + '/im-service/v1/enter_room?id=' + $('#roomID').val() + '&type=' + $('#roomType').val());
             const res = await $.post(r).promise();
             console.log('server enter room ok', res); output(res);
         });
@@ -102,14 +108,14 @@
         });
 
         $('#leaveRoom').click(async () => {
-            const r = wrap(service + '/im-service/v1/leave_room?id=' + $('#roomID').val() + '&user=' + $('#userId').val());
+            const r = wrap(service + '/im-service/v1/leave_room?id=' + $('#roomID').val());
             const res = await $.post(r).promise();
             console.log('server leave room ok', res); output(res);
         });
 
         // 离开房间转让权限，在IM转让群主身份
         $('#changeOwner').click(async () => {
-            const r = wrap(service + '/im-service/v1/change_owner?id=' + $('#roomID4Owner').val() + '&user=' + $('#ownerID').val());
+            const r = wrap(service + '/im-service/v1/change_owner?id=' + $('#roomID4Owner').val() + '&to=' + $('#ownerID').val());
             const res = await $.post(r).promise();
             console.log('server leave room ok', res); output(res);
         });
@@ -123,7 +129,7 @@
             console.log('server sendmsg ok', res); output(res);
         });
         $('#group').click(() => {
-            $('#to').val($('#group').is(':checked')? 'MyMeeting' : 'user1');
+            $('#to').val($('#group').is(':checked')? 'SrsSystemLogs' : 'user1');
         });
     });
 </script>

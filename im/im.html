@@ -17,18 +17,21 @@
     </p>
     <div id="rooms">
         <p>
-            <input id="roomID" value="MyMeeting">
+            <input id="roomID" value="SrsSystemLogs">
+            <select id="roomType">
+                <option value="Private">Private, 好友工作群（Work）</option>
+                <option value="Public">Public, 陌生人社交群（Public）</option>
+                <option value="ChatRoom">ChatRoom, 临时会议群（Meeting）</option>
+                <option value="AVChatRoom" selected>AVChatRoom, 直播群（AVChatRoom）</option>
+            </select>
             <button id="createRoom">Create Room</button>
             <button id="deleteRoom">Delete Room</button>
-        </p>
-        <p>
-            <input id="roomID4Join" value="MyMeeting">
             <button id="joinRoom">Join Room</button>
             <button id="leaveRoom">Leave Room</button>
         </p>
         <p>
             <input id="ownerID" value="user1">
-            <input id="roomID4Owner" value="MyMeeting">
+            <input id="roomID4Owner" value="SrsSystemLogs">
             <button id="changeOwner">Change Owner</button>
         </p>
         <p>
@@ -91,7 +94,7 @@
         // 创建房间，向IM创建群组
         $('#createRoom').click(async () => {
             let gid = $('#roomID').val();
-            const res = await tim.createGroup({type: TIM.TYPES.GRP_MEETING, name: gid, groupID: gid});
+            const res = await tim.createGroup({type: $('#roomType').val(), name: gid, groupID: gid});
             console.log('im', res); output(res);
         });
 
@@ -102,13 +105,13 @@
 
         // 加入房间，在IM加入群组
         $('#joinRoom').click(async () => {
-            let gid = $('#roomID4Join').val();
-            const res = await tim.joinGroup({type: TIM.TYPES.GRP_MEETING, applyMessage: 'Hello', groupID: gid});
+            let gid = $('#roomID').val();
+            const res = await tim.joinGroup({type: $('#roomType').val(), applyMessage: 'Hello', groupID: gid});
             console.log('im', res); output(res);
         });
 
         $('#leaveRoom').click(async () => {
-            const res = await tim.quitGroup($('#roomID4Join').val());
+            const res = await tim.quitGroup($('#roomID').val());
             console.log('im', res); output(res);
         });
 
@@ -122,7 +125,7 @@
 
         // 发送消息给个人或群组
         $('#group').click(() => {
-            $('#to').val($('#group').is(':checked')? 'MyMeeting' : 'user1');
+            $('#to').val($('#group').is(':checked')? 'SrsSystemLogs' : 'user1');
         });
         $('#send').click(async () => {
             const msg = ($('#timestamp').is(':checked')? new Date().getTime() + ': ' : '') +$('#msg').val();

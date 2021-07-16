@@ -12,9 +12,16 @@ exports.main_handler = async (event, context) => {
 
         // 状态变更回调，@see https://cloud.tencent.com/document/product/269/2570
         if (body && body.CallbackCommand === 'State.StateChange') {
-            await new SDK().invoke({functionName: process.env.DB_INTERNAL_SERVICE, logType: LogType.Tail, data: {
-            path: '/db-internal/v1/logtrace', queryString: {level: 'trace', module: 'im', event: body.Info.Action, msg: `${body.Info.To_Account} ${body.Info.Action} for ${body.Info.Reason}, im-callback ${event.body}`},
-            }})
+            // Log to DB.
+            const r0 = await new SDK().invoke({functionName: process.env.DB_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+                path: '/db-internal/v1/logtrace', queryString: {level: 'trace', module: 'im', event: body.Info.Action, msg: `${body.Info.To_Account} ${body.Info.Action} for ${body.Info.Reason}, im-callback ${event.body}`},
+            }});
+            // Broadcast in room.
+            const msgContent = JSON.stringify({account: body.Info.To_Account, action: body.Info.Action, reason: body.Info.Reason});
+            const r1 = await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+                path: '/im-internal/v1/send_group_msg', queryString: {to: process.env.IM_GROUP_SYSLOG}, body: JSON.stringify({msg: msgContent}),
+            }});
+            console.log('im callback', r0, r1);
         }
 
         const res = {ActionStatus: 'OK', ErrorCode: 0, ErrorInfo: ''}
@@ -100,7 +107,7 @@ async function verifyUserToken(user, token) {
     })
 
     const r1 = (!r0 || !r0.Result || !r0.Result.RetMsg)? null : JSON.parse(r0.Result.RetMsg)
-    console.log('verify token ${user}, ${token} r0=', r1)
+    console.log(`verify token ${user}, ${token} r0=`, r1)
 
     if (!r1 || !r1.verify) {
         throw new Error(`verify token ${token} for user ${user} failed`)

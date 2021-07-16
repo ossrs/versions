@@ -45,7 +45,14 @@ SRS_PASSWORD1=ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f
 SRS_ADMIN2=guest
 SRS_PASSWORD2=ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f
 
+# 系统默认的IM群组名称，api模块初始化时创建
 IM_GROUP_SYSLOG=SrsSystemLogs
+# GroupType: Private,Public,ChatRoom,AVChatRoom @see https://cloud.tencent.com/document/product/269/1502#GroupType
+#       Private, 好友工作群（Work）
+#       Public, 陌生人社交群（Public）
+#       ChatRoom, 临时会议群（Meeting）
+#       AVChatRoom, 直播群（AVChatRoom）
+IM_GROUP_TYPE=AVChatRoom
 
 CAPTCHA_APP_ID=xxxxxxxxx
 CAPTCHA_APP_SECRET_KEY=xxxxxxxxxxxxxxx

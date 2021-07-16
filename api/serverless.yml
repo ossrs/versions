@@ -8,7 +8,7 @@ inputs:
   name: ${name}-${stage}-${app}
   region: ${env:REGION}
   handler: index.main_handler
-  runtime: Nodejs10.15
+  runtime: Nodejs12.16
   timeout: 30
   role: SCF_QcsRole
   src: 
@@ -24,6 +24,7 @@ inputs:
       MYSQL_PORT: ${output:${stage}:${app}:mysql-service.connection.port}
       MYSQL_PASSWORD: ${output:${stage}:${app}:mysql-service.adminPassword}
       IM_GROUP_SYSLOG: ${env:IM_GROUP_SYSLOG}
+      IM_GROUP_TYPE: ${env:IM_GROUP_TYPE}
   vpcConfig:
     vpcId: ${output:${stage}:${app}:vpc4-service.vpcId}
     subnetId: ${output:${stage}:${app}:vpc4-service.subnetId}

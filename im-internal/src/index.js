@@ -13,7 +13,7 @@ exports.main_handler = async (event, context) => {
     if (event.path === '/im-internal/v1/account_import') {
         res = await tim.account_import(q.user, q.nickName, q.faceUrl)
     } else if (event.path === '/im-internal/v1/create_group') {
-        res = await tim.create_group(q.user, tim.TYPES.GRP_WORK, q.id, q.id)
+        res = await tim.create_group(q.user, q.type, q.id, q.id)
     } else if (event.path === '/im-internal/v1/add_group_member') {
         res = await tim.add_group_member(q.id, 1, [q.user])
     } else if (event.path === '/im-internal/v1/destroy_group') {
@@ -21,7 +21,7 @@ exports.main_handler = async (event, context) => {
     } else if (event.path === '/im-internal/v1/delete_group_member') {
         res = await tim.delete_group_member(q.id, 1, [q.user])
     } else if (event.path === '/im-internal/v1/change_group_owner') {
-        res = await tim.change_group_owner(q.id, q.user)
+        res = await tim.change_group_owner(q.id, q.to)
     } else if (event.path === '/im-internal/v1/sendmsg') {
         res = await tim.sendmsg(q.from, 2, q.to, body.msg)
     } else if (event.path === '/im-internal/v1/send_group_msg') {
@@ -30,7 +30,7 @@ exports.main_handler = async (event, context) => {
         res = await tim.send_group_system_notification(q.to, null, body.msg)
     // Room internal APIs.
     } else if (event.path === '/im-internal/v1/enter_room') {
-        await tim.create_group(q.user, tim.TYPES.GRP_WORK, q.id, q.id)
+        await tim.create_group(q.user, q.type, q.id, q.id)
         res = await tim.add_group_member(q.id, 1, [q.user])
     // Unknown API.
     } else {
