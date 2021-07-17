@@ -78,17 +78,20 @@
             tim = TIM.create({SDKAppID: conf.SDKAppID});
             tim.setLogLevel(1); // 0: Normal, 1: Release, 2: Warning, 3: Error, 4: Disabled.
             tim.registerPlugin({'tim-upload-plugin': TIMUploadPlugin});
-            tim.on(TIM.EVENT.SDK_READY, async (event) => {
-                $('#rooms').show();
+            tim.on(TIM.EVENT.MESSAGE_RECEIVED, (event) => {
+                let r = event.data[0].payload;
+                console.log('received message', event, r); message(event);
             });
-            tim.on(TIM.EVENT.MESSAGE_RECEIVED, async (event) => {
-                console.log('received message', event); message(event);
-            });
-            await tim.login({userID: conf.userID, userSig: conf.userSig});
 
-            $('#logout').click(async () => {
-                await tim.logout();
+            await new Promise((resolve, reject) => {
+                tim.on(TIM.EVENT.SDK_READY, (event) => { resolve(); });
+                tim.login({userID: conf.userID, userSig: conf.userSig}).catch(reject);
             });
+            $('#rooms').show();
+        });
+
+        $('#logout').click(async () => {
+            await tim.logout();
         });
 
         // 创建房间，向IM创建群组

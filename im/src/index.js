@@ -17,9 +17,9 @@ exports.main_handler = async (event, context) => {
                 path: '/db-internal/v1/logtrace', queryString: {level: 'trace', module: 'im', event: body.Info.Action, msg: `${body.Info.To_Account} ${body.Info.Action} for ${body.Info.Reason}, im-callback ${event.body}`},
             }});
             // Broadcast in room.
-            const msgContent = JSON.stringify({account: body.Info.To_Account, action: body.Info.Action, reason: body.Info.Reason});
+            const buildBody = function(obj) { return JSON.stringify({msg: JSON.stringify(obj)}); };
             const r1 = await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
-                path: '/im-internal/v1/send_group_msg', queryString: {to: process.env.IM_GROUP_SYSLOG}, body: JSON.stringify({msg: msgContent}),
+                path: '/im-internal/v1/send_group_msg', queryString: {to: process.env.IM_GROUP_SYSLOG}, body: buildBody({account: body.Info.To_Account, action: body.Info.Action, reason: body.Info.Reason}),
             }});
             console.log('im callback', r0, r1);
         }
@@ -54,9 +54,20 @@ exports.main_handler = async (event, context) => {
         await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
             path: '/im-internal/v1/create_group', queryString: q,
         }})
-        res.im = parseSFCResult(await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
-            path: '/im-internal/v1/add_group_member', queryString: q,
-        }}))
+
+        // For AVChatRoom, we response the channel info for client to init it, @see https://cloud.tencent.com/document/product/269/1621
+        if (q.type === 'AVChatRoom') {
+            res.clientShouldInitializeChannel = true;
+            res.channel = {type:q.type, groupID:q.id, applyMessage:`Client join ${q.id}`};
+        } else {
+            // If not AVChatRoom, server do the channel initialize(join IM group).
+            res.clientShouldInitializeChannel = false;
+            res.im = parseSFCResult(await new SDK().invoke({
+                functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+                    path: '/im-internal/v1/add_group_member', queryString: q,
+                }
+            }))
+        }
     } else if (event.path === '/im-service/v1/delete_room') {
         await verifyUserToken(q.user, q.token)
         res.im = parseSFCResult(await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
