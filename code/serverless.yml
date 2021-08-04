@@ -20,6 +20,9 @@ inputs:
       TENCENT_SECRET_KEY: ${env:TENCENT_SECRET_KEY}
       CAPTCHA_APP_ID: ${env:CAPTCHA_APP_ID}
       CAPTCHA_APP_SECRET_KEY: ${env:CAPTCHA_APP_SECRET_KEY}
+  cls:
+    logsetId: ${env:SCF_LOGSET}
+    topicId: ${env:SCF_LOGTOPIC}
   events:
     - apigw:
         parameters:

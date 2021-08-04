@@ -20,4 +20,7 @@ inputs:
       IM_SDKAPPID: ${env:IM_SDKAPPID}
       IM_SECRETKEY: ${env:IM_SECRETKEY}
       IM_ADMINISTRATOR: ${env:IM_ADMINISTRATOR}
+  cls:
+    logsetId: ${env:SCF_LOGSET}
+    topicId: ${env:SCF_LOGTOPIC}
   events: []

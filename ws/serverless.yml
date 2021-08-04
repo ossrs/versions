@@ -20,7 +20,7 @@ inputs:
   apigw:
     timeout: 300
     environment: release
-    serviceId: ${output:${stage}:${app}:wsgw-service.serviceId}
+    #serviceId: ${output:${stage}:${app}:wsgw-service.serviceId}
     protocols:
       - http
       - https

@@ -20,4 +20,7 @@ inputs:
       EMAIL_PASSWORD: ${env:EMAIL_PASSWORD}
       EMAIL_SERVICE: ${env:EMAIL_SERVICE}
       EMAIL_PORT: ${env:EMAIL_PORT}
+  cls:
+    logsetId: ${env:SCF_LOGSET}
+    topicId: ${env:SCF_LOGTOPIC}
   events: []

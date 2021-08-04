@@ -23,6 +23,9 @@ inputs:
       IM_SECRETKEY: ${env:IM_SECRETKEY}
       IM_GROUP_SYSLOG: ${env:IM_GROUP_SYSLOG}
       JWT_SECRET: ${env:JWT_SECRET}
+  cls:
+    logsetId: ${env:SCF_LOGSET}
+    topicId: ${env:SCF_LOGTOPIC}
   events:
     - apigw:
         parameters:

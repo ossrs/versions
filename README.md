@@ -30,12 +30,11 @@ TENCENT_SECRET_KEY=xxxxxxxxxxxxxxxxxx
 JWT_SECRET=xxxxxxxxxxxxxxxxxx
 
 REGION=ap-guangzhou
-ZONE2=ap-guangzhou-2
-ZONE4=ap-guangzhou-4
 DESCRIPTION=SRS查询可用的稳定版本
 
-MYSQL_DB=srs_version
-MYSQL_USER=root
+# SCF日志服务配置 scf_logtopic scf_logset
+SCF_LOGTOPIC=xxxxxxxxx
+SCF_LOGSET=xxxxxxxxx
 
 IM_SDKAPPID=xxxxxxxxx
 IM_SECRETKEY=xxxxxxxxxxxxxxx

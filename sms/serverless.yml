@@ -22,4 +22,7 @@ inputs:
       SMS_SIGN_NAME: ${env:SMS_SIGN_NAME}
       SMS_TEMPLATE_ID: ${env:SMS_TEMPLATE_ID}
       SMS_PHONE_NUMBER: ${env:SMS_PHONE_NUMBER}
+  cls:
+    logsetId: ${env:SCF_LOGSET}
+    topicId: ${env:SCF_LOGTOPIC}
   events: []
