@@ -55,19 +55,6 @@ IM_GROUP_SYSLOG=SrsSystemLogs
 #       ChatRoom, 临时会议群（Meeting）
 #       AVChatRoom, 直播群（AVChatRoom）
 IM_GROUP_TYPE=AVChatRoom
-
-CAPTCHA_APP_ID=xxxxxxxxx
-CAPTCHA_APP_SECRET_KEY=xxxxxxxxxxxxxxx
-
-EMAIL_USER=xxx@xxx.com
-EMAIL_PASSWORD=xxxxxxxxx
-EMAIL_SERVICE=smtp.xxx.com
-EMAIL_PORT=xxx
-
-SMS_SDKAPPID=xxx
-SMS_SIGN_NAME=xxx
-SMS_TEMPLATE_ID=xxx
-SMS_PHONE_NUMBER=+8615800000000
 END
 ```
 
