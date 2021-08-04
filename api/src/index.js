@@ -65,7 +65,7 @@ exports.main_handler = async (event, context) => {
 
     // Modify the response body of api-service SCF.
     let rr = r.Result && r.Result.RetMsg && JSON.parse(r.Result.RetMsg)
-    res.db = (!rr || rr.errorCode)? null : rr
+    if (q.feedback) res.db = (!rr || rr.errorCode)? null : rr
   }
 
   // Call the im-service SCF to notify all users.
@@ -78,7 +78,7 @@ exports.main_handler = async (event, context) => {
 
     // Modify the response body of api-service SCF.
     let rr = r.Result && r.Result.RetMsg && JSON.parse(r.Result.RetMsg)
-    res.im = (!rr || rr.errorCode)? null : rr
+    if (q.feedback) res.im = (!rr || rr.errorCode)? null : rr
   }
 
   console.log(`SRS id=${q.id}, version=${version}, eip=${q.eip}, rip=${q.rip}, res=`, res, ', scf=', r0, r1, ', by', event)
