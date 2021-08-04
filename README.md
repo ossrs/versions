@@ -26,6 +26,9 @@ cat << END > .env
 TENCENT_SECRET_ID=AKIDxxxxxxxxx
 TENCENT_SECRET_KEY=xxxxxxxxxxxxxxxxxx
 
+# 系统颁发用户Token的基础密钥
+JWT_SECRET=xxxxxxxxxxxxxxxxxx
+
 REGION=ap-guangzhou
 ZONE2=ap-guangzhou-2
 ZONE4=ap-guangzhou-4

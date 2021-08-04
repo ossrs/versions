@@ -3,6 +3,7 @@
     "http": "^0.0.1-security",
     "https": "^1.0.0",
     "js-sha256": "^0.9.0",
+    "jsonwebtoken": "^8.5.1",
     "tencentcloud-serverless-nodejs": "^1.0.3",
     "tls-sig-api-v2": "^1.0.1"
   }

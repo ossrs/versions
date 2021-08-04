@@ -44,31 +44,13 @@ exports.main_handler = async (event, context) => {
     )
     const verify = rows[0] && rows[0].nn
 
-    // Genereate token if login ok.
-    let token = sha256(q.user + '/' + q.password + '/' + new Date().getTime())
-    if (verify) {
-      await db.query(
-        'UPDATE admins SET token=? WHERE userName=?',
-        [token, q.user],
-      )
-    }
-
     // Write syslog.
     await db.query(
       'INSERT INTO logtrace(level, module, event, msg) VALUES(?, ?, ?, ?)',
       ['trace', 'api', 'login', `${q.user} login, verify=${verify}, password=${q.password}`],
     )
 
-    return {user: q.user, verify: verify, token: token}
-  }
-
-  // Verify user token.
-  if (event.path === '/db-internal/v1/token') {
-    const [rows] = await db.query(
-      'SELECT count(1) as nn FROM admins WHERE userName=? and token=?',
-      [q.user, q.token],
-    )
-    return {user: q.user, verify: rows[0] && rows[0].nn}
+    return {user: q.user, verify: verify}
   }
 
   // Write syslog.

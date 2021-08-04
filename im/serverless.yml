@@ -22,6 +22,7 @@ inputs:
       IM_SDKAPPID: ${env:IM_SDKAPPID}
       IM_SECRETKEY: ${env:IM_SECRETKEY}
       IM_GROUP_SYSLOG: ${env:IM_GROUP_SYSLOG}
+      JWT_SECRET: ${env:JWT_SECRET}
   events:
     - apigw:
         parameters:
