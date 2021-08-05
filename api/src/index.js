@@ -14,20 +14,27 @@ const dockerMirror = "registry.cn-hangzhou.aliyuncs.com/ossrs/srs"
 
 exports.main_handler = async (event, context) => {
   let q = event.queryString || {}
-	let version = q.version? q.version :  "v0.0.0"
+  let version = q.version? q.version :  "v0.0.0"
+
+  // Parse headers to lower case.
+  event.headers = event.headers || {}
+  Object.keys(event.headers).map(e => {
+    event.headers[e.toLowerCase()] = event.headers[e];
+  });
+  console.log(`api q=${JSON.stringify(q)}, headers=${JSON.stringify(event.headers)}`);
 
   // Initialize system.
   await initialize()
 
-	// Transform version to vx.x.x
+  // Transform version to vx.x.x
   if (version.indexOf('v') !== 0) {
-		version = "v" + version
-	}
+    version = "v" + version
+  }
   if (version.indexOf('.') === -1) {
-		version += ".0.0"
-	}
+    version += ".0.0"
+  }
 
-	// Build response.
+  // Build response.
   let res = {
     stable_version: stableVersion3,
     stable_docker: stableDocker3,
@@ -49,19 +56,21 @@ exports.main_handler = async (event, context) => {
     res.match_version = stableVersion3
     res.match_docker = stableDocker3
   }
-	res.match_docker_image = dockerImage + ':' + res.match_docker
-	res.match_docker_mirror = dockerMirror + ':' + res.match_docker
-	res.stable_docker_image = dockerImage + ':' + res.stable_docker
-	res.stable_docker_mirror = dockerMirror + ':' + res.stable_docker
+  res.match_docker_image = dockerImage + ':' + res.match_docker
+  res.match_docker_mirror = dockerMirror + ':' + res.match_docker
+  res.stable_docker_image = dockerImage + ':' + res.stable_docker
+  res.stable_docker_mirror = dockerMirror + ':' + res.stable_docker
 
-  q.rip = event.headers && event.headers['X-Forwarded-For']
+  // See GetOriginalClientIP of https://github.com/winlinvip/http-gif-sls-writer/blob/master/main.go
+  q.rip = getOriginalClientIP(q, event.headers, event.requestContext);
+  q.fwd = event.headers['x-forwarded-for'];
 
   // Call the db SCF to write to MySQL.
   let r0 = null
   if (q.id && q.version) {
     let r = r0 = await new SDK().invoke({functionName: process.env.DB_INTERNAL_SERVICE, logType: LogType.Tail, data: {
-      path: '/db-internal/v1/versions', queryString: q, res: res,
-    }})
+        path: '/db-internal/v1/versions', queryString: q, res: res,
+      }})
 
     // Modify the response body of api-service SCF.
     let rr = r.Result && r.Result.RetMsg && JSON.parse(r.Result.RetMsg)
@@ -72,19 +81,37 @@ exports.main_handler = async (event, context) => {
   let r1 = null
   if (q.id && q.version) {
     let r = r1 = await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
-      path: '/im-internal/v1/send_group_msg', queryString: {to:process.env.IM_GROUP_SYSLOG}, 
-      body: JSON.stringify({msg: JSON.stringify({api: new Date().getTime(), q: q, res: res})}),
-    }})
+        path: '/im-internal/v1/send_group_msg', queryString: {to:process.env.IM_GROUP_SYSLOG},
+        body: JSON.stringify({msg: JSON.stringify({api: new Date().getTime(), q: q, res: res})}),
+      }})
 
     // Modify the response body of api-service SCF.
     let rr = r.Result && r.Result.RetMsg && JSON.parse(r.Result.RetMsg)
     if (q.feedback) res.im = (!rr || rr.errorCode)? null : rr
   }
 
-  console.log(`SRS id=${q.id}, version=${version}, eip=${q.eip}, rip=${q.rip}, res=`, res, ', scf=', r0, r1, ', by', event)
+  console.log(`SRS id=${q.id}, version=${version}, eip=${q.eip}, rip=${q.rip}, fwd=${q.fwd}, res=${JSON.stringify(res)}, scf r0=${JSON.stringify(r0)}, scf r1=${JSON.stringify(r1)}`)
   return res
 }
 
+// See GetOriginalClientIP of https://github.com/winlinvip/http-gif-sls-writer/blob/master/main.go
+function getOriginalClientIP(q, headers, context) {
+  if (q && q.clientip) return q.clientip;
+
+  const fwd = headers && headers['x-forwarded-for'];
+  if (fwd) {
+    const index = fwd.indexOf(',')
+    if (index != -1) return fwd.substr(0, index);
+    return fwd;
+  }
+
+  const rip = headers && headers['x-real-ip'];
+  if (rip) return rip;
+
+  return context && context.sourceIp;
+}
+
+// Import admins to IM.
 global.initialized
 
 async function initialize() {
@@ -95,19 +122,19 @@ async function initialize() {
 
   // Call the db SCF to get system users.
   let r0 = await new SDK().invoke({functionName: process.env.DB_INTERNAL_SERVICE, logType: LogType.Tail, data: {
-    path: '/db-internal/v1/users',
-  }})
+      path: '/db-internal/v1/users',
+    }})
   let r1 = r0.Result && r0.Result.RetMsg && JSON.parse(r0.Result.RetMsg)
   console.log('users', r1.users)
 
   // Call the im SCF to register users to IM, then create group and join.
   r1.users.map(async function(user) {
     await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
-      path: '/im-internal/v1/account_import', queryString: {user: user}
-    }})
+        path: '/im-internal/v1/account_import', queryString: {user: user}
+      }})
     await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
-      path: '/im-internal/v1/enter_room', queryString: {user: user, id: process.env.IM_GROUP_SYSLOG, type: process.env.IM_GROUP_TYPE}
-    }})
+        path: '/im-internal/v1/enter_room', queryString: {user: user, id: process.env.IM_GROUP_SYSLOG, type: process.env.IM_GROUP_TYPE}
+      }})
   })
 }
 

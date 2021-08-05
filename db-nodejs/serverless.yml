@@ -22,6 +22,9 @@ inputs:
       SRS_PASSWORD1: ${env:SRS_PASSWORD1}
       SRS_ADMIN2: ${env:SRS_ADMIN2}
       SRS_PASSWORD2: ${env:SRS_PASSWORD2}
+      SLS_PROJECT: ${env:SLS_PROJECT}
+      SLS_ENDPOINT: ${env:SLS_ENDPOINT}
+      SLS_LOGSTORE: ${env:SLS_LOGSTORE}
   cls:
     logsetId: ${env:SCF_LOGSET}
     topicId: ${env:SCF_LOGTOPIC}
