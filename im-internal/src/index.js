@@ -1,5 +1,7 @@
 'use strict';
 
+const { SDK, LogType }  = require('tencentcloud-serverless-nodejs')
+
 const im = require('./im.server')
 const SDKAppID = parseInt(process.env.IM_SDKAPPID)
 const tim = im.create(SDKAppID, process.env.IM_SECRETKEY, process.env.IM_ADMINISTRATOR)
@@ -7,6 +9,9 @@ const tim = im.create(SDKAppID, process.env.IM_SECRETKEY, process.env.IM_ADMINIS
 exports.main_handler = async (event, context) => {
     const q = event.queryString || {}
     const body = event.body? JSON.parse(event.body) : {}
+
+    // Initialize system.
+    await initialize()
 
     let res = null
     // RAW IM APIs.
@@ -40,3 +45,31 @@ exports.main_handler = async (event, context) => {
     console.log("Handle im-internal", event.path, ", q=", q, ", res=", res, ", event=", event)
     return res
 };
+
+// Import admins to IM.
+global.initialized
+
+async function initialize() {
+    if (global.initialized) {
+        return
+    }
+    global.initialized = true
+
+    // Call the db SCF to get system users.
+    let r0 = await new SDK().invoke({functionName: process.env.DB_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+            path: '/db-internal/v1/users',
+        }})
+    let r1 = r0.Result && r0.Result.RetMsg && JSON.parse(r0.Result.RetMsg)
+    console.log('users', r1.users)
+
+    // Call the im SCF to register users to IM, then create group and join.
+    r1.users.map(async function(user) {
+        await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+                path: '/im-internal/v1/account_import', queryString: {user: user}
+            }})
+        await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
+                path: '/im-internal/v1/enter_room', queryString: {user: user, id: process.env.IM_GROUP_SYSLOG, type: process.env.IM_GROUP_TYPE}
+            }})
+    })
+}
+
