@@ -13,26 +13,36 @@ const dockerImage = "ossrs/srs"
 const dockerMirror = "registry.cn-hangzhou.aliyuncs.com/ossrs/srs"
 
 exports.main_handler = async (event, context) => {
-  let q = event.queryString || {}
-  let version = q.version? q.version :  "v0.0.0"
+  // Filter the querystring.
+  let {q, version} = filterVersion(event);
 
   // Parse headers to lower case.
-  event.headers = event.headers || {}
-  Object.keys(event.headers).map(e => {
-    event.headers[e.toLowerCase()] = event.headers[e];
-  });
+  filterHeaders(event);
   console.log(`api q=${JSON.stringify(q)}, headers=${JSON.stringify(event.headers)}`);
 
-  // Transform version to vx.x.x
-  if (version.indexOf('v') !== 0) {
-    version = "v" + version
-  }
-  if (version.indexOf('.') === -1) {
-    version += ".0.0"
+  // Build response.
+  let res = buildVersion(q, version);
+  buildFeatures(q, version, res);
+
+  // See GetOriginalClientIP of https://github.com/winlinvip/http-gif-sls-writer/blob/master/main.go
+  q.rip = getOriginalClientIP(q, event.headers, event.requestContext);
+  q.fwd = event.headers['x-forwarded-for'];
+
+  // Add the feed back address.
+  if (q.feedback) {
+    res.addr = {rip: q.rip, fwd: q.fwd};
   }
 
-  // Build response.
-  let res = {
+  // Call the im-service SCF to notify all users.
+  let r1 = await im_broadcast(q, res);
+
+  console.log(`SRS id=${q.id}, version=${version}, eip=${q.eip}, rip=${q.rip}, fwd=${q.fwd}, res=${JSON.stringify(res)}, scf r1=${JSON.stringify(r1)}`)
+  return res
+}
+
+// Build the version and docker image url.
+function buildVersion(q, version) {
+  const res = {
     stable_version: stableVersion3,
     stable_docker: stableDocker3,
   }
@@ -58,16 +68,56 @@ exports.main_handler = async (event, context) => {
   res.stable_docker_image = dockerImage + ':' + res.stable_docker
   res.stable_docker_mirror = dockerMirror + ':' + res.stable_docker
 
-  // See GetOriginalClientIP of https://github.com/winlinvip/http-gif-sls-writer/blob/master/main.go
-  q.rip = getOriginalClientIP(q, event.headers, event.requestContext);
-  q.fwd = event.headers['x-forwarded-for'];
+  return res;
+}
 
-  // Add the feed back address.
-  if (q.feedback) {
-    res.addr = {rip: q.rip, fwd: r.fwd};
+// Build features query.
+function buildFeatures(q, version, res) {
+  if (q.docker) res.docker = 'stable';
+  if (q.cross) res.cross = 'dev';
+  if (q.rtc) res.rtc = 'dev';
+  if (q.srt) res.srt = 'dev';
+  if (q.api) res.api = 'stable';
+  if (q.https) res.https = 'dev';
+  if (q.raw) res.raw = 'dev';
+  if (q.rtsp) res.rtsp = 'dev';
+  if (q.forward) res.forward = 'stable';
+  if (q.ingest) res.ingest = 'stable';
+  if (q.edge) res.edge = 'stable';
+  if (q.hls) res.hls = 'stable';
+  if (q.dvr) res.dvr = 'stable';
+  if (q.flv) res.flv = 'stable';
+  if (q.hooks) res.hooks = 'stable';
+  if (q.dash) res.dash = 'dev';
+  if (q.hds) res.hds = 'deprecated';
+  if (q.exec) res.exec = 'dev';
+  if (q.transcode) res.transcode = 'dev';
+  if (q.security) res.security = 'dev';
+  if (q.gb28181) res.gb28181 = 'feature';
+  if (q.las) res.las = 'feature';
+  if (q.h265) res.h265 = 'feature';
+  if (q.simulcast) res.simulcast = 'feature';
+  if (q.sctp) res.sctp = 'feature';
+  if (q.g711) res.g711 = 'feature';
+}
+
+// Filter the version from querystring.
+function filterVersion(event) {
+  let q = event.queryString || {}
+
+  let version = q.version? q.version :  "v0.0.0"
+  if (version.indexOf('v') !== 0) {
+    version = "v" + version
+  }
+  if (version.indexOf('.') === -1) {
+    version += ".0.0"
   }
 
-  // Call the im-service SCF to notify all users.
+  return {q, version};
+}
+
+// Broadcast by IM.
+async function im_broadcast(q, res) {
   let r1 = null
   if (q.id && q.version) {
     let r = r1 = await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
@@ -80,8 +130,7 @@ exports.main_handler = async (event, context) => {
     if (q.feedback) res.im = (!rr || rr.errorCode)? null : rr
   }
 
-  console.log(`SRS id=${q.id}, version=${version}, eip=${q.eip}, rip=${q.rip}, fwd=${q.fwd}, res=${JSON.stringify(res)}, scf r1=${JSON.stringify(r1)}`)
-  return res
+  return r1;
 }
 
 // See GetOriginalClientIP of https://github.com/winlinvip/http-gif-sls-writer/blob/master/main.go
@@ -99,5 +148,13 @@ function getOriginalClientIP(q, headers, context) {
   if (rip) return rip;
 
   return context && context.sourceIp;
+}
+
+// Filter headers.
+function filterHeaders(event) {
+  event.headers = event.headers || {}
+  Object.keys(event.headers).map(e => {
+    event.headers[e.toLowerCase()] = event.headers[e];
+  });
 }
 
