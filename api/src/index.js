@@ -99,6 +99,7 @@ function buildFeatures(q, version, res) {
   if (q.simulcast) res.simulcast = 'feature';
   if (q.sctp) res.sctp = 'feature';
   if (q.g711) res.g711 = 'feature';
+  if (q.sip) res.sip = 'dev';
 }
 
 // Filter the version from querystring.
