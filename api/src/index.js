@@ -80,7 +80,8 @@ function buildFeatures(q, version, res) {
   if (q.api) res.api = 'stable';
   if (q.https) res.https = 'dev';
   if (q.raw) res.raw = 'dev';
-  if (q.rtsp) res.rtsp = 'dev';
+  if (q.rtsp) res.rtsp = 'deprecated'; // StreamCaster: Push RTSP.
+  if (q.flv2) res.rtsp = 'dev'; // StreamCaster: Push FLV.
   if (q.forward) res.forward = 'stable';
   if (q.ingest) res.ingest = 'stable';
   if (q.edge) res.edge = 'stable';
