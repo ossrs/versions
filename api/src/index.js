@@ -73,34 +73,37 @@ function buildVersion(q, version) {
 
 // Build features query.
 function buildFeatures(q, version, res) {
-  if (q.docker) res.docker = 'stable';
-  if (q.cross) res.cross = 'dev';
-  if (q.rtc) res.rtc = 'dev';
-  if (q.srt) res.srt = 'dev';
-  if (q.api) res.api = 'stable';
-  if (q.https) res.https = 'dev';
-  if (q.raw) res.raw = 'dev';
-  if (q.rtsp) res.rtsp = 'deprecated'; // StreamCaster: Push RTSP.
-  if (q.flv2) res.rtsp = 'dev'; // StreamCaster: Push FLV.
-  if (q.forward) res.forward = 'stable';
-  if (q.ingest) res.ingest = 'stable';
-  if (q.edge) res.edge = 'stable';
-  if (q.hls) res.hls = 'stable';
-  if (q.dvr) res.dvr = 'stable';
-  if (q.flv) res.flv = 'stable';
-  if (q.hooks) res.hooks = 'stable';
-  if (q.dash) res.dash = 'dev';
-  if (q.hds) res.hds = 'deprecated';
-  if (q.exec) res.exec = 'dev';
-  if (q.transcode) res.transcode = 'dev';
-  if (q.security) res.security = 'dev';
-  if (q.gb28181) res.gb28181 = 'feature';
-  if (q.las) res.las = 'feature';
-  if (q.h265) res.h265 = 'feature';
-  if (q.simulcast) res.simulcast = 'feature';
-  if (q.sctp) res.sctp = 'feature';
-  if (q.g711) res.g711 = 'feature';
-  if (q.sip) res.sip = 'dev';
+  if (q.docker) res.docker = 'stable'; // Run by Docker
+  if (q.api) res.api = 'stable'; // System HTTP-API
+  if (q.forward) res.forward = 'stable'; // Foward to other RTMP servers
+  if (q.ingest) res.ingest = 'stable'; // Use FFmpeg to ingest streams
+  if (q.edge) res.edge = 'stable'; // RTMP/FLV edge cluster
+  if (q.hls) res.hls = 'stable'; // HLS live streaming
+  if (q.dvr) res.dvr = 'stable'; // DVR to VoD files
+  if (q.flv) res.flv = 'stable'; // HTTP-FLV live streaming
+  if (q.hooks) res.hooks = 'stable'; // HTTP Callbacks(Hooks)
+
+  if (q.cross) res.cross = 'dev'; // HTTP CORS(Cross Origin Resource Sharing)
+  if (q.rtc) res.rtc = 'dev'; // WebRTC SFU
+  if (q.srt) res.srt = 'dev'; // SRT(Secure Reliable Transport)
+  if (q.https) res.https = 'dev'; // HTTPS API, live streaming and callback
+  if (q.raw) res.raw = 'dev'; // HTTP RAW API
+  if (q.flv2) res.flv2 = 'dev'; // StreamCaster: Push FLV.
+  if (q.dash) res.dash = 'dev'; // MPEG-DASH live streaming
+  if (q.exec) res.exec = 'dev'; // Exec program when publish
+  if (q.transcode) res.transcode = 'dev'; // Use FFmpeg to transcode
+  if (q.security) res.security = 'dev'; // Referer and IP Security
+
+  if (q.sip) res.sip = 'feature'; // SIP of GB28181
+  if (q.gb28181) res.gb28181 = 'feature'; // StreamCaster: Push GB28181
+  if (q.las) res.las = 'feature'; // https://las-tech.org.cn
+  if (q.h265) res.h265 = 'feature'; // H.265 codec
+  if (q.simulcast) res.simulcast = 'feature'; // WebRTC simulcast
+  if (q.sctp) res.sctp = 'feature'; // WebRTC DataChannel
+  if (q.g711) res.g711 = 'feature'; // WebRTC G.711
+
+  if (q.hds) res.hds = 'deprecated'; // Adobe HDS live streaming
+  if (q.rtsp) res.rtsp = 'deprecated'; // StreamCaster: Push RTSP
 }
 
 // Filter the version from querystring.
