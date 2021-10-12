@@ -78,6 +78,7 @@ function buildFeatures(q, version, res) {
   if (q.forward) res.forward = 'stable'; // Foward to other RTMP servers
   if (q.ingest) res.ingest = 'stable'; // Use FFmpeg to ingest streams
   if (q.edge) res.edge = 'stable'; // RTMP/FLV edge cluster
+  if (q.oc) res.oc = 'stable'; // RTMP/FLV origin cluster
   if (q.hls) res.hls = 'stable'; // HLS live streaming
   if (q.dvr) res.dvr = 'stable'; // DVR to VoD files
   if (q.flv) res.flv = 'stable'; // HTTP-FLV live streaming
