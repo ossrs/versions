@@ -124,6 +124,8 @@ function filterVersion(event) {
 
 // Broadcast by IM.
 async function im_broadcast(q, res) {
+  return null;
+
   let r1 = null
   if (q.id && q.version) {
     let r = r1 = await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
