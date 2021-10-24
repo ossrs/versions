@@ -83,6 +83,7 @@ function buildFeatures(q, version, res) {
   if (q.dvr) res.dvr = 'stable'; // DVR to VoD files
   if (q.flv) res.flv = 'stable'; // HTTP-FLV live streaming
   if (q.hooks) res.hooks = 'stable'; // HTTP Callbacks(Hooks)
+  if (q.x86) res.x86 = 'stable'; // For amd64, x86_64, i386 arch.
 
   if (q.cross) res.cross = 'dev'; // HTTP CORS(Cross Origin Resource Sharing)
   if (q.rtc) res.rtc = 'dev'; // WebRTC SFU
@@ -94,6 +95,9 @@ function buildFeatures(q, version, res) {
   if (q.exec) res.exec = 'dev'; // Exec program when publish
   if (q.transcode) res.transcode = 'dev'; // Use FFmpeg to transcode
   if (q.security) res.security = 'dev'; // Referer and IP Security
+  if (q.arm) res.arm = 'dev'; // For arm, aarch64 arch.
+  if (q.mips) res.mips = 'dev'; // For mips arch.
+  if (q.loong) res.loong = 'dev'; // For Loongson arch.
 
   if (q.sip) res.sip = 'feature'; // SIP of GB28181
   if (q.gb28181) res.gb28181 = 'feature'; // StreamCaster: Push GB28181
