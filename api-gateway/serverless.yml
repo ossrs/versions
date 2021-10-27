@@ -5,8 +5,8 @@ component: apigateway
 name: apigw-service
 
 inputs:
-  region: ${env:REGION}
-  serviceName: apigw_service
+  region: ap-guangzhou
+  serviceName: srsVersions
   environment: release
   protocols:
     - http

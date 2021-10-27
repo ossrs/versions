@@ -1,10 +1,13 @@
 .PHONY: clean build
 
-build: src/.build
+all: build
+	sls deploy
 
-src/.build: src/*.js src/package.json Makefile
-	cd src && npm install && rm -f src/.build && touch .build
+build: .build
+
+.build: *.js package.json Makefile
+	npm install && rm -f .build && touch .build
 
 clean: 
-	rm -rf ./src/node_modules src/.build
+	rm -rf ./node_modules .build
 
