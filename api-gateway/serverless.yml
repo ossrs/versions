@@ -17,6 +17,6 @@ inputs:
       method: ANY # GET POST PUT DELETE HEAD ANY
       apiName: 'mock-api'
       serviceType: MOCK
-      serviceMockReturnMessage: '{"code": 0, "data": {"module": "HTTP/HTTPS API Gateway", "path": "/service/v1/releases"}}'
+      serviceMockReturnMessage: '"HelloWorld"'
 
 # https://github.com/serverless-components/tencent-apigateway/blob/master/docs/configure.md

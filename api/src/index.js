@@ -33,10 +33,7 @@ exports.main_handler = async (event, context) => {
     res.addr = {rip: q.rip, fwd: q.fwd};
   }
 
-  // Call the im-service SCF to notify all users.
-  let r1 = await im_broadcast(q, res);
-
-  console.log(`SRS id=${q.id}, version=${version}, eip=${q.eip}, rip=${q.rip}, fwd=${q.fwd}, res=${JSON.stringify(res)}, scf r1=${JSON.stringify(r1)}`)
+  console.log(`SRS id=${q.id}, version=${version}, eip=${q.eip}, rip=${q.rip}, fwd=${q.fwd}, res=${JSON.stringify(res)}`)
   return res
 }
 
@@ -124,25 +121,6 @@ function filterVersion(event) {
   }
 
   return {q, version};
-}
-
-// Broadcast by IM.
-async function im_broadcast(q, res) {
-  return null;
-
-  let r1 = null
-  if (q.id && q.version) {
-    let r = r1 = await new SDK().invoke({functionName: process.env.IM_INTERNAL_SERVICE, logType: LogType.Tail, data: {
-        path: '/im-internal/v1/send_group_msg', queryString: {to:process.env.IM_GROUP_SYSLOG},
-        body: JSON.stringify({msg: JSON.stringify({api: new Date().getTime(), q: q, res: res})}),
-      }})
-
-    // Modify the response body of api-service SCF.
-    let rr = r.Result && r.Result.RetMsg && JSON.parse(r.Result.RetMsg)
-    if (q.feedback) res.im = (!rr || rr.errorCode)? null : rr
-  }
-
-  return r1;
 }
 
 // See GetOriginalClientIP of https://github.com/winlinvip/http-gif-sls-writer/blob/master/main.go

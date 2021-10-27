@@ -17,7 +17,6 @@ inputs:
   environment:
     variables:
       REGION: ${env:REGION}
-      IM_INTERNAL_SERVICE: im-internal-service-${stage}-${app}
       IM_GROUP_SYSLOG: ${env:IM_GROUP_SYSLOG}
       IM_GROUP_TYPE: ${env:IM_GROUP_TYPE}
   cls:
