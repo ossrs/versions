@@ -18,7 +18,7 @@ TENCENT_SECRET_ID=AKIDxxxxxxxxx
 TENCENT_SECRET_KEY=xxxxxxxxxxxxxxxxxx
 ```
 
-> Note: Please set the right [TENCENT_SECRET_ID and TENCENT_SECRET_KEY](https://console.cloud.tencent.com/cam) for serverless and captcha, etc.
+> Note: Please set the correct [TENCENT_SECRET_ID and TENCENT_SECRET_KEY](https://console.cloud.tencent.com/cam).
 
 3. Build and deploy serverless:
 
@@ -26,6 +26,6 @@ TENCENT_SECRET_KEY=xxxxxxxxxxxxxxxxxx
 make
 ```
 
-4. Access the API-gateway url in log, like: https://xxxx-xxxx-xxxxxxxx.gz.apigw.tencentcs.com/release/service/v1/releases
+4. Access the API-gateway url in log, like: https://service-o1uepcee-1303949587.gz.apigw.tencentcs.com/release/service/v1/releases
 
 Winlin 2021.06
