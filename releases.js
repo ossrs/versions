@@ -1,47 +1,20 @@
-'use strict'
+'use strict';
 
-const { SDK, LogType }  = require('tencentcloud-serverless-nodejs')
+const stableDocker2 = "v2.0-r10";
+const stableVersion2 = "2.0.274";
+const stableDocker3 = "v3.0-r7";
+const stableVersion3 = "3.0.164";
+const stableDocker4 = "v4.0-b1";
+const stableVersion4 = "4.0.206";
 
-const stableDocker2 = "v2.0-r10"
-const stableVersion2 = "2.0.274"
-const stableDocker3 = "v3.0-r7"
-const stableVersion3 = "3.0.164"
-const stableDocker4 = "v4.0.139"
-const stableVersion4 = "v4.0.139"
-
-const dockerImage = "ossrs/srs"
-const dockerMirror = "registry.cn-hangzhou.aliyuncs.com/ossrs/srs"
-
-exports.main_handler = async (event, context) => {
-  // Filter the querystring.
-  let {q, version} = filterVersion(event);
-
-  // Parse headers to lower case.
-  filterHeaders(event);
-  console.log(`api q=${JSON.stringify(q)}, headers=${JSON.stringify(event.headers)}`);
-
-  // Build response.
-  let res = buildVersion(q, version);
-  buildFeatures(q, version, res);
-
-  // See GetOriginalClientIP of https://github.com/winlinvip/http-gif-sls-writer/blob/master/main.go
-  q.rip = getOriginalClientIP(q, event.headers, event.requestContext);
-  q.fwd = event.headers['x-forwarded-for'];
-
-  // Add the feed back address.
-  if (q.feedback) {
-    res.addr = {rip: q.rip, fwd: q.fwd};
-  }
-
-  console.log(`SRS id=${q.id}, version=${version}, eip=${q.eip}, rip=${q.rip}, fwd=${q.fwd}, res=${JSON.stringify(res)}`)
-  return res
-}
+const dockerImage = "ossrs/srs";
+const dockerMirror = "registry.cn-hangzhou.aliyuncs.com/ossrs/srs";
 
 // Build the version and docker image url.
 function buildVersion(q, version) {
   const res = {
-    stable_version: stableVersion3,
-    stable_docker: stableDocker3,
+    stable_version: stableVersion4,
+    stable_docker: stableDocker4,
   }
 
   if (version.indexOf('v2.') === 0) {
@@ -57,8 +30,8 @@ function buildVersion(q, version) {
     res.match_version = stableVersion4
     res.match_docker = stableDocker4
   } else {
-    res.match_version = stableVersion3
-    res.match_docker = stableDocker3
+    res.match_version = stableVersion4
+    res.match_docker = stableDocker4
   }
   res.match_docker_image = dockerImage + ':' + res.match_docker
   res.match_docker_mirror = dockerMirror + ':' + res.match_docker
@@ -124,20 +97,20 @@ function filterVersion(event) {
 }
 
 // See GetOriginalClientIP of https://github.com/winlinvip/http-gif-sls-writer/blob/master/main.go
-function getOriginalClientIP(q, headers, context) {
+function getOriginalClientIP(q, headers, sourceIp) {
   if (q && q.clientip) return q.clientip;
 
   const fwd = headers && headers['x-forwarded-for'];
   if (fwd) {
     const index = fwd.indexOf(',')
-    if (index != -1) return fwd.substr(0, index);
+    if (index !== -1) return fwd.substr(0, index);
     return fwd;
   }
 
   const rip = headers && headers['x-real-ip'];
   if (rip) return rip;
 
-  return context && context.sourceIp;
+  return sourceIp;
 }
 
 // Filter headers.
@@ -147,4 +120,33 @@ function filterHeaders(event) {
     event.headers[e.toLowerCase()] = event.headers[e];
   });
 }
+
+exports.handle = (ctx) => {
+  // Filter the querystring.
+  let {q, version} = filterVersion({
+    queryString: ctx.request.query
+  });
+
+  // Parse headers to lower case.
+  filterHeaders({
+    headers: ctx.headers,
+  });
+  console.log(`api q=${JSON.stringify(q)}, headers=${JSON.stringify(ctx.headers)}`);
+
+  // Build response.
+  let res = buildVersion(q, version);
+  buildFeatures(q, version, res);
+
+  // See GetOriginalClientIP of https://github.com/winlinvip/http-gif-sls-writer/blob/master/main.go
+  q.rip = getOriginalClientIP(q, ctx.headers, ctx.request.ip);
+  q.fwd = ctx.headers['x-forwarded-for'];
+
+  // Add the feed back address.
+  if (q.feedback) {
+    res.addr = {rip: q.rip, fwd: q.fwd};
+  }
+
+  console.log(`SRS id=${q.id}, version=${version}, eip=${q.eip}, rip=${q.rip}, fwd=${q.fwd}, res=${JSON.stringify(res)}`);
+  ctx.body = res;
+};
 
