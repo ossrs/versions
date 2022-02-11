@@ -77,6 +77,10 @@ function buildFeatures(q, version, res) {
   if (q.sctp) res.sctp = 'feature'; // WebRTC DataChannel
   if (q.g711) res.g711 = 'feature'; // WebRTC G.711
 
+  if (q.region) res.region = 'feature'; // Service region.
+  if (q.source) res.source = 'feature'; // Service source.
+  if (q.mgmt) res.mgmt = 'feature'; // Service mgmt version.
+
   if (q.hds) res.hds = 'deprecated'; // Adobe HDS live streaming
   if (q.rtsp) res.rtsp = 'deprecated'; // StreamCaster: Push RTSP
 }
