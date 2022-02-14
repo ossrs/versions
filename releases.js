@@ -79,7 +79,6 @@ function buildFeatures(q, version, res) {
 
   if (q.region) res.region = 'feature'; // Service region.
   if (q.source) res.source = 'feature'; // Service source.
-  if (q.mgmt) res.mgmt = 'feature'; // Service mgmt version.
 
   if (q.hds) res.hds = 'deprecated'; // Adobe HDS live streaming
   if (q.rtsp) res.rtsp = 'deprecated'; // StreamCaster: Push RTSP
