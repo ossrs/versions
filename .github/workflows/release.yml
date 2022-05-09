@@ -1,4 +1,4 @@
-name: "Release"
+name: "Release SRS versions"
 
 on:
   push:
@@ -15,6 +15,13 @@ jobs:
       # Git checkout
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      # Generate variables like:
+      #   SRS_DROPLET_EIP=1.2.3.4
+      - name: Build droplet variables
+        run: |
+          SRS_DROPLET_EIP=$(dig +short lh.ossrs.net)
+          echo "SRS_DROPLET_EIP=$SRS_DROPLET_EIP" >> $GITHUB_ENV
 
       ################################################################
       # Build
@@ -50,14 +57,28 @@ jobs:
           docker push --all-tags registry.cn-hangzhou.aliyuncs.com/ossrs/versions
 
       ################################################################
-      # K8S
-      - name: Setup KUBECONFIG for Aliyun ACK
-        run: |-
-          KUBECONFIG=$RUNNER_TEMP/kubeconfig_$(date +%s)
-          echo "${{ secrets.KUBECONFIG }}" > $KUBECONFIG
-          echo "KUBECONFIG=$KUBECONFIG" >> $GITHUB_ENV
-      # K8S for SRS versions
-      - name: Release SRS versions to Aliyun ACK
-        run: |-
-          kubectl set image deploy/versions-deploy versions=registry.cn-hangzhou.aliyuncs.com/ossrs/versions:$SRS_TAG
-          kubectl describe deploy/versions-deploy
+      # Execute command in a ssh, because ufw limit the rate.
+      - name: Restart the containers
+        env:
+          SEARCH_APIKEY: ${{ secrets.SEARCH_APIKEY }}
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.SRS_DROPLET_EIP }}
+          username: root
+          key: ${{ secrets.DIGITALOCEAN_SSHKEY }}
+          port: 22
+          envs: SRS_TAG,SRS_MAJOR
+          timeout: 60s
+          command_timeout: 30m
+          script: |
+            #
+            #ufw allow 8102 # For srs server versions.
+            #
+            # Restart SRS versions
+            for ((i=0; i < 5; i++)); do
+              if [[ $(docker ps -af name=docs-srsversion |wc -l) -eq 1 ]]; then echo "Killed"; break; fi;
+              docker rm -f docs-srsversion; sleep 0.3;
+            done
+            docker run -d -it --restart always --name docs-srsversion -p 8102:9000 \
+              registry.cn-hangzhou.aliyuncs.com/ossrs/versions:$SRS_TAG
+
