@@ -75,10 +75,13 @@ jobs:
             #ufw allow 8102 # For srs server versions.
             #
             # Restart SRS versions
-            for ((i=0; i < 5; i++)); do
-              if [[ $(docker ps -af name=docs-srsversion |wc -l) -eq 1 ]]; then echo "Killed"; break; fi;
-              docker rm -f docs-srsversion; sleep 0.3;
-            done
-            docker run -d -it --restart always --name docs-srsversion -p 8102:9000 \
-              registry.cn-hangzhou.aliyuncs.com/ossrs/versions:$SRS_TAG
+            cat << END > /root/restart_docs-srsversion.sh
+              for ((i=0; i < 5; i++)); do
+                if [[ $(docker ps -af name=docs-srsversion |wc -l) -eq 1 ]]; then echo "Killed"; break; fi;
+                docker rm -f docs-srsversion; sleep 0.3;
+              done
+              docker run -d -it --restart always --name docs-srsversion -p 8102:9000 \
+                registry.cn-hangzhou.aliyuncs.com/ossrs/versions:$SRS_TAG
+            END
+            bash /root/restart_docs-srsversion.sh
 
