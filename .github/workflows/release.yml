@@ -72,16 +72,14 @@ jobs:
           command_timeout: 30m
           script: |
             #
-            #ufw allow 8102 # For srs server versions.
+            ufw allow 8102 # For srs server versions.
             #
             # Restart SRS versions
             cat << END > /root/restart_docs-srsversion.sh
-              for ((i=0; i < 5; i++)); do
-                if [[ $(docker ps -af name=docs-srsversion |wc -l) -eq 1 ]]; then echo "Killed"; break; fi;
-                docker rm -f docs-srsversion; sleep 0.3;
-              done
+              docker pull registry.cn-hangzhou.aliyuncs.com/ossrs/versions:$SRS_MAJOR
+              docker rm -f docs-srsversion || sleep 1
               docker run -d -it --restart always --name docs-srsversion -p 8102:9000 \
-                registry.cn-hangzhou.aliyuncs.com/ossrs/versions:$SRS_TAG
+                registry.cn-hangzhou.aliyuncs.com/ossrs/versions:$SRS_MAJOR
             END
             bash /root/restart_docs-srsversion.sh
 
